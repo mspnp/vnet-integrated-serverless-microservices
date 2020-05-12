@@ -1,1 +1,2 @@
-src/PatientTestsApi/package-lock.json
+# Terraform
+.terraform/
