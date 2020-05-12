@@ -1,0 +1,10 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "FUNCTIONS_WORKER_RUNTIME": "node",
+      "APPINSIGHTS_INSTRUMENTATIONKEY": "",
+      "mongo_connection_string": "mongo_connection_string",
+      "patient_tests_database": "newcastle",
+      "allow_self_signed_mongo_cert": true
+    }
+  }
