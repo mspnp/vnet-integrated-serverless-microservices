@@ -66,7 +66,7 @@ describe("PatientController", async function (): Promise<void> {
     expect(response.body).to.equal("lastUpdated unexpected.");
   });
 
-  it("Returns Bad request if patient request ca not be parsed.", async function (): Promise<void> {
+  it("Returns Bad request if patient request can not be parsed.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
     const request = createPatientRequest({});

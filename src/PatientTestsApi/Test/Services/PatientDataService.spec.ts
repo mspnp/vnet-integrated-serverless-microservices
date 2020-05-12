@@ -5,7 +5,7 @@ import { PatientFixture } from "../Fixtures/PatientFixture";
 
 const db = new DBFixture();
 
-describe("PatientDataService #integaration", async function (): Promise<void> {
+describe("PatientDataService #integration", async function (): Promise<void> {
   before(async function (): Promise<void> {
     await db.init();
     await db.cleanPatients();

@@ -23,13 +23,10 @@ export class PatientController {
     if (req.body.lastUpdated != null) {
       return new BadRequestResponse("lastUpdated unexpected.");
     }
-
-    req.body.lastUpdated = new Date();
-
-    
-
+   
     const patient = req.body as IPatient || {};
     patient.id = uuidv4();
+    patient.lastUpdated = new Date();
     await this.patientDataService.insertPatient(patient);
     
     return new CreatedResponse(patient);

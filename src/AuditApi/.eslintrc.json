@@ -1,0 +1,51 @@
+{
+    "env": {
+        "commonjs": true,
+        "node": true,
+        "es2017": true,
+        "mocha": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 2019,
+        "project": "./tsconfig.json"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "ignorePatterns": ["/Services/app-insights"],
+    "rules": {
+        "semi": "off",
+        "@typescript-eslint/semi": ["error"],
+        "quotes": "off",
+        "@typescript-eslint/quotes": ["error", "double"],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "error"
+          ],
+        "@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" } ],
+        "@typescript-eslint/no-non-null-assertion": "off"
+    },
+    "overrides": [
+        {
+          "files": ["*.spec.ts"],
+          "rules": {
+            "no-unused-expressions": "off",
+            "@typescript-eslint/unbound-method": "off",
+            "@typescript-eslint/require-await": "off",
+            "@typescript-eslint/no-misused-promises": "off",
+            "@typescript-eslint/no-use-before-define": "off"
+          }
+        }
+      ]
+}
