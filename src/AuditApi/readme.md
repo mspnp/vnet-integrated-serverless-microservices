@@ -30,7 +30,7 @@ You can run the code by running `func host start` in teh terminal or by using VS
 ### VS Code
 The .vscode contains all the tasks you need to run and debug the code. You can press f5 to run the application and debug it, as described [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code?tabs=csharp#debugging-functions-locally) 
 
-Try it out by doing an HTPP POST to `http://localhost:7071/api/auditrecord` with the following body:
+Try it out by doing an HTPP POST to `http://localhost:7072/api/auditrecord` with the following body:
 
 ```json
 {

@@ -8,21 +8,28 @@ import { RetryCollection } from "../Services/RetryCollection";
 import { LoggingCollection } from "../Services/LoggingCollection";
 import { AppInsightsService } from "../Services/app-insights/app-insights-service";
 import { TraceContext, HttpRequest } from "@azure/functions";
+import { AuditService } from "../Services/AuditService";
+import Axios, { AxiosInstance } from "axios";
+import { HttpDataService } from "../Services/HttpDataService";
 
 export class ControllerFactory {
 
   private static mongoDb: Promise<Db>;
   private readonly settings: ISettings;
+  private static axiosClient: AxiosInstance;
 
   constructor () {
     this.settings = new EnvironmentSettings();  
+    ControllerFactory.axiosClient = Axios.create();
   }
 
   public async createPatientController(functionContext: TraceContext, request: HttpRequest): Promise<PatientController> {
     const appInsightsService = new AppInsightsService(functionContext, request);
     const collection = await this.CreateCollection(this.settings.patientCollection, appInsightsService);
     const dataService: PatientDataService = new PatientDataService(collection);
-    return new PatientController(dataService);
+    const httpDataService = new HttpDataService(ControllerFactory.axiosClient, appInsightsService);
+    const auditService = new AuditService(httpDataService, this.settings);
+    return new PatientController(dataService, auditService);
   }
 
   private async CreateCollection(collectionName: string, appInsightsService: AppInsightsService): Promise<ICollection> {

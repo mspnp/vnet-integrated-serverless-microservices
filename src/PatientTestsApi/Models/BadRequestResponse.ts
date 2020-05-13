@@ -1,4 +1,6 @@
 import { IResponse } from "./IResponse";
+import * as HttpStatus from "http-status-codes";
+
 export class BadRequestResponse extends Error implements IResponse {
   public constructor(message: string) {
     super ("Bad request: " + message);
@@ -6,5 +8,7 @@ export class BadRequestResponse extends Error implements IResponse {
   }
   body: string;
   headers = { "Content-Type": "application/json" };
-  status = 400;
+  status = HttpStatus.BAD_REQUEST;
 }
+
+

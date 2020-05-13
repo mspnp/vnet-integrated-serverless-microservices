@@ -4,6 +4,7 @@ import { InsertOneWriteOpResult } from "mongodb";
 import { IAppInsightsService } from "../../Services/app-insights/app-insights-service";
 import { LoggingCollection } from "../../Services/LoggingCollection";
 import { expect } from "chai";
+import { AppInsightsFixture } from "../Fixtures/AppInsightsServiceFixture";
 
 describe("LoggingCollection", async function (): Promise<void> {
   it("Tracks dependencies for succesful database calls", async function(): Promise<void> {
@@ -26,8 +27,8 @@ describe("LoggingCollection", async function (): Promise<void> {
     expect(actualTelemetry.dependencyTypeName).is.equal("mongodb");
     expect(actualTelemetry.resultCode).is.equal(0);
     expect(actualTelemetry.success).is.equal(true);
-    expect(actualTelemetry.name).is.equal(expectedDbName);
-    expect(actualTelemetry.target).is.equal(expectedCollectionName);
+    expect(actualTelemetry.name).is.equal(expectedCollectionName);
+    expect(actualTelemetry.target).is.equal(expectedDbName);
 
   });
 
@@ -38,7 +39,7 @@ describe("LoggingCollection", async function (): Promise<void> {
     const expectedErrorString = JSON.stringify(expectedError, Object.getOwnPropertyNames(expectedError));
     when(mockCollection.insertOne(expectedDoc, anything()))
     .thenThrow(expectedError);
-    const mockAppInsightsService = mock<IAppInsightsService>();
+    const mockAppInsightsService = new AppInsightsFixture().createAppInsightsMock();
     const expectedCollectionName = "collectionName";
     const expectedDbName = "dbName";
     const appInsightsService = instance(mockAppInsightsService);
@@ -51,8 +52,8 @@ describe("LoggingCollection", async function (): Promise<void> {
     expect(actualTelemetry.dependencyTypeName).is.equal("mongodb");
     expect(actualTelemetry.resultCode).is.equal(expectedErrorString);
     expect(actualTelemetry.success).is.equal(false);
-    expect(actualTelemetry.name).is.equal(expectedDbName);
-    expect(actualTelemetry.target).is.equal(expectedCollectionName);
+    expect(actualTelemetry.name).is.equal(expectedCollectionName);
+    expect(actualTelemetry.target).is.equal(expectedDbName);
 
   });
 

@@ -6,5 +6,8 @@
       "mongo_connection_string": "mongo_connection_string",
       "audit_database": "newcastle",
       "allow_self_signed_mongo_cert": true
+    },
+    "Host": {
+      "LocalHttpPort": 7072
     }
   }

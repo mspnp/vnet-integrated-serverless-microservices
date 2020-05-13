@@ -5,6 +5,9 @@
       "APPINSIGHTS_INSTRUMENTATIONKEY": "",
       "mongo_connection_string": "mongo_connection_string",
       "patient_tests_database": "newcastle",
-      "allow_self_signed_mongo_cert": true
+      "allow_self_signed_mongo_cert": true,
+      "audit_api_url": "http://localhost:7072/api/auditrecord",
+      "audit_auth_key": "audit Auth Key",
+      "enable_audit_integration_tests": false
     }
   }

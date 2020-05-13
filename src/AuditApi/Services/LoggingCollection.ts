@@ -45,7 +45,7 @@ export class LoggingCollection implements ICollection {
       time: timer.endDate,
       resultCode,
       success,
-      name: this.dbName,
-      target: this.collectionName };
+      name: this.collectionName,
+      target: this.dbName };
   }
 }
