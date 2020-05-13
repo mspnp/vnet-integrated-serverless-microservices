@@ -230,6 +230,26 @@ resource "azurerm_api_management" "apim" {
   }
 }
 
+# API Management Logger
+resource "azurerm_api_management_logger" "logger" {
+  name                = "logger"
+  resource_group_name = var.project_name
+  api_management_name = azurerm_api_management.apim.name
+
+  application_insights {
+    instrumentation_key = azurerm_application_insights.ai.instrumentation_key
+  }
+}
+
+# API Management Diagnostic
+# 2020-05-13 Cannot work due to following issue
+# https://github.com/terraform-providers/terraform-provider-azurerm/issues/6619
+# resource "azurerm_api_management_diagnostic" "diagnostic" {
+#   identifier          = "applicationinsights"
+#   resource_group_name = var.project_name
+#   api_management_name = azurerm_api_management.apim.name
+# }
+
 # API Management Backend
 # 2020-05-12 Currently azurerm provider cannot add function app as backend to API Management
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/5032
