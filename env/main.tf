@@ -164,6 +164,9 @@ module "fa_patient_api" {
 
   extra_app_settings = {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
+    patient_tests_database  = "newcastle"
+    audit_api_url           = "https://${module.fa_audit_api.default_hostname}/api/auditrecord"
+    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.fa_audit_api_host_key.id})"
   }
 
   key_vault_id = azurerm_key_vault.kv.id
@@ -183,6 +186,7 @@ module "fa_audit_api" {
 
   extra_app_settings = {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
+    audit_database          = "newcastle"
   }
 
   key_vault_id = azurerm_key_vault.kv.id
@@ -263,22 +267,22 @@ resource "azurerm_api_management_backend" "fa_patient_api" {
 }
 
 # API
-resource "azurerm_api_management_api" "helloworld" {
-  name                = "helloworld-api"
+resource "azurerm_api_management_api" "patient" {
+  name                = "patient-api"
   resource_group_name = azurerm_api_management.apim.resource_group_name
   api_management_name = azurerm_api_management.apim.name
   revision            = "1"
-  display_name        = "HelloWorld API"
-  path                = "helloworld"
+  display_name        = "Patient API"
+  path                = "patient"
   protocols           = ["https"]
-  service_url         = "https://${module.fa_patient_api.default_hostname}/api/HelloWorld"
+  service_url         = "https://${module.fa_patient_api.default_hostname}/api/patient"
 }
 
 # API Policy
-resource "azurerm_api_management_api_policy" "helloworld_policy" {
-  api_name            = azurerm_api_management_api.helloworld.name
-  api_management_name = azurerm_api_management_api.helloworld.api_management_name
-  resource_group_name = azurerm_api_management_api.helloworld.resource_group_name
+resource "azurerm_api_management_api_policy" "patient_policy" {
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
 
   xml_content = <<XML
 <policies>
@@ -310,13 +314,13 @@ XML
 }
 
 # API Operation
-resource "azurerm_api_management_api_operation" "helloworld_get" {
-  operation_id        = "helloworld-get"
-  api_name            = azurerm_api_management_api.helloworld.name
-  api_management_name = azurerm_api_management_api.helloworld.api_management_name
-  resource_group_name = azurerm_api_management_api.helloworld.resource_group_name
-  display_name        = "HelloWorld GET"
-  method              = "GET"
+resource "azurerm_api_management_api_operation" "patient_post" {
+  operation_id        = "patient-post"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Create Patient"
+  method              = "POST"
   url_template        = "/"
 }
 
@@ -358,7 +362,7 @@ resource "azurerm_key_vault_access_policy" "apim" {
 # Key Vault Secret
 resource "azurerm_key_vault_secret" "cosmos_conn" {
   name         = "cosmos-conn"
-  value        = azurerm_cosmosdb_account.cosmos.connection_strings[0]
+  value        = "${azurerm_cosmosdb_account.cosmos.connection_strings[0]}&retryWrites=false"
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
