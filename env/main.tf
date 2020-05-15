@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "~>2.0"
+  version = "~> 2.9"
   features {}
 }
 
@@ -14,15 +14,14 @@ terraform {
 data "azurerm_client_config" "current" {}
 
 # Resource Group
-# resource "azurerm_resource_group" "rg" {
-#   name     = "${var.project_name}-rg-${var.environment}"
-#   location = var.location
-# }
+data "azurerm_resource_group" "rg" {
+  name = var.project_name
+}
 
 # Cosmos DB Account
 resource "azurerm_cosmosdb_account" "cosmos" {
   name                = "${var.project_name}-cosmos-${var.environment}"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   offer_type          = "Standard"
   kind                = "MongoDB"
@@ -74,7 +73,7 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
 # Storage Account
 resource "azurerm_storage_account" "sa" {
   name                      = "${var.project_name}sa${var.environment}"
-  resource_group_name       = var.project_name
+  resource_group_name       = data.azurerm_resource_group.rg.name
   location                  = var.location
   account_kind              = "StorageV2"
   account_tier              = "Standard"
@@ -86,7 +85,7 @@ resource "azurerm_storage_account" "sa" {
 # Elastic Premium Plan
 resource "azurerm_app_service_plan" "asp_patient_api" {
   name                = "${var.project_name}-asp-patient-api-${var.environment}"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   kind                = "elastic"
 
@@ -103,7 +102,7 @@ resource "azurerm_app_service_plan" "asp_patient_api" {
 # Consumption Plan
 resource "azurerm_app_service_plan" "asp_audit_api" {
   name                = "${var.project_name}-asp-audit-api-${var.environment}"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   kind                = "FunctionApp"
 
@@ -116,7 +115,7 @@ resource "azurerm_app_service_plan" "asp_audit_api" {
 # Application Insights
 resource "azurerm_application_insights" "ai" {
   name                = "${var.project_name}-ai-${var.environment}"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   application_type    = "Node.JS"
   retention_in_days   = 90
@@ -125,7 +124,7 @@ resource "azurerm_application_insights" "ai" {
 # Virtual Network
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.project_name}-vnet-${var.environment}"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   address_space       = ["10.0.0.0/16"]
 }
@@ -133,7 +132,7 @@ resource "azurerm_virtual_network" "vnet" {
 # Subnet
 resource "azurerm_subnet" "snet" {
   name                 = "${var.project_name}-snet-${var.environment}"
-  resource_group_name  = var.project_name
+  resource_group_name  = data.azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.0.0/26"]
 
@@ -154,7 +153,7 @@ resource "azurerm_subnet" "snet" {
 module "fa_patient_api" {
   source                           = "./modules/function_app"
   name                             = "${var.project_name}-fa-patient-api-${var.environment}"
-  resource_group_name              = var.project_name
+  resource_group_name              = data.azurerm_resource_group.rg.name
   location                         = var.location
   app_service_plan_id              = azurerm_app_service_plan.asp_patient_api.id
   storage_account_name             = azurerm_storage_account.sa.name
@@ -176,7 +175,7 @@ module "fa_patient_api" {
 module "fa_audit_api" {
   source                           = "./modules/function_app"
   name                             = "${var.project_name}-fa-audit-api-${var.environment}"
-  resource_group_name              = var.project_name
+  resource_group_name              = data.azurerm_resource_group.rg.name
   location                         = var.location
   app_service_plan_id              = azurerm_app_service_plan.asp_audit_api.id
   storage_account_name             = azurerm_storage_account.sa.name
@@ -222,7 +221,7 @@ resource "azurerm_app_service_virtual_network_swift_connection" "vnet_int" {
 # API Management
 resource "azurerm_api_management" "apim" {
   name                = "${var.project_name}-apim-${var.environment}"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   publisher_name      = var.publisher_name
   publisher_email     = var.publisher_email
@@ -237,7 +236,7 @@ resource "azurerm_api_management" "apim" {
 # API Management Logger
 resource "azurerm_api_management_logger" "logger" {
   name                = "logger"
-  resource_group_name = var.project_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   api_management_name = azurerm_api_management.apim.name
 
   application_insights {
@@ -250,7 +249,7 @@ resource "azurerm_api_management_logger" "logger" {
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/6619
 # resource "azurerm_api_management_diagnostic" "diagnostic" {
 #   identifier          = "applicationinsights"
-#   resource_group_name = var.project_name
+#   resource_group_name = data.azurerm_resource_group.rg.name
 #   api_management_name = azurerm_api_management.apim.name
 # }
 
@@ -327,7 +326,7 @@ resource "azurerm_api_management_api_operation" "patient_post" {
 # Key Vault
 resource "azurerm_key_vault" "kv" {
   name                        = "${var.project_name}-kv-${var.environment}"
-  resource_group_name         = var.project_name
+  resource_group_name         = data.azurerm_resource_group.rg.name
   location                    = var.location
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_enabled         = false
