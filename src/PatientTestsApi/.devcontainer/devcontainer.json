@@ -11,8 +11,7 @@
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
 
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "npm install",
+	"postCreateCommand": "rm -rf ./node_modules",
 
 	// Uncomment the next line to have VS Code connect as an existing non-root user in the container.
 	// On Linux, by default, the container user's UID/GID will be updated to match your local user. See
@@ -20,15 +19,11 @@
 	// "remoteUser": "node",
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
-	"extensions": [
+  "extensions": [
 		"ms-azuretools.vscode-azurefunctions",
 		"dbaeumer.vscode-eslint",
-		"42crunch.vscode-openapi",
-		"arjun.swagger-viewer",
-		"alexkrechik.cucumberautocomplete",
-		"mauve.terraform",
-		"ms-vscode.vscode-typescript-tslint-plugin",
-		"quicktype.quicktype",
-		"hbenl.vscode-mocha-test-adapter"
+    "quicktype.quicktype",
+    "hbenl.vscode-mocha-test-adapter",
+    "hbenl.vscode-test-explorer"
 	]
 }

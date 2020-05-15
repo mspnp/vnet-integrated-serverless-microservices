@@ -3,10 +3,11 @@
   "version": "",
   "description": "",
   "scripts": {
-    "test": "mocha --timeout 30000 --allow-uncaught --config .mocharc.json 'dist/Test/**/*.spec.js'",
-    "build": "tsc",
+    "test": "npx mocha --timeout 30000 --allow-uncaught --config .mocharc.json 'dist/Test/**/*.spec.js'",
+    "build": "npx tsc",
     "clean": "npx rimraf ./dist ./node_modules",
-    "lint": "npx eslint . --ext .ts"
+    "lint": "npx eslint . --ext .ts",
+    "build:production": "npm run clean && npm install && npm run build && npm prune --production"
   },
   "author": "",
   "devDependencies": {

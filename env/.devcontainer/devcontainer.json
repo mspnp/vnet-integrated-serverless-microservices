@@ -1,9 +1,9 @@
 // For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
 // https://github.com/microsoft/vscode-dev-containers/tree/master/containers/azure-functions-node-10
 {
-	"name": "Azure Functions & Node.js 12",
+	"name": "Terraform, Azure CLI & Azure Functions & Node.js 12",
 	"dockerFile": "Dockerfile",
-	"appPort": 7072,
+	"appPort": 7073,
 
 	// Use 'settings' to set *default* container specific settings.json values on container create.
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
@@ -11,7 +11,8 @@
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
 
-	"postCreateCommand": "rm -rf ./node_modules",
+	// Uncomment the next line to run commands after the container is created.
+	// "postCreateCommand": "npm install",
 
 	// Uncomment the next line to have VS Code connect as an existing non-root user in the container.
 	// On Linux, by default, the container user's UID/GID will be updated to match your local user. See
@@ -22,8 +23,6 @@
 	"extensions": [
 		"ms-azuretools.vscode-azurefunctions",
 		"dbaeumer.vscode-eslint",
-    "quicktype.quicktype",
-    "hbenl.vscode-mocha-test-adapter",
-    "hbenl.vscode-test-explorer"
+		"mauve.terraform"
 	]
 }

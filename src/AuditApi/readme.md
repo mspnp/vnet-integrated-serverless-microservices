@@ -7,7 +7,7 @@
 
 This project includes a [dev container](https://code.visualstudio.com/docs/remote/containers), with the prerequisites installed.
 
-Copy the contents of `template.settings.json` to a file in the root folder called `local.settings.json`. This is where you will keep all the settings used for running the app locally.
+Copy the contents of `template.settings.json` to a file in the root folder called `local.settings.json`. This is where you will keep all the settings used for running the app locally. If you are running in a dev container, remember to replace all references to `localhost` in your settings with `host.docker.internal`
 
 ## Mongodb 
 You'll need a mongodb to use to store data:
@@ -52,4 +52,8 @@ This project contains unit and integration tests written using Mocha. You can ru
 This project is configured to use ESLint for linting. Run the liniting from the terminal using `npm run lint`, or using the 'lint whole folder' task for the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for VSCode.
 
 ## Publishing to Azure
-To publish this code to Azure and obtain a public url, follow the instructions [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code?tabs=csharp#publish-to-azure)
+To publish this code to Azure and obtain a public url using VSCode, follow the instructions [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code?tabs=csharp#publish-to-azure). 
+
+To significantly reduce the size of the deployed package, run `npm run build:production` before publishing your app. 
+
+If your function app already exists, you can use the Functions CLI to publish using the command `func azure functionapp publish {functionappname}` as described [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash#publish).

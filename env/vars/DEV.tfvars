@@ -1,4 +1,4 @@
-project_name = "newcastle"
+project_name = "projectnewcastle"
 
 environment = "dev"
 

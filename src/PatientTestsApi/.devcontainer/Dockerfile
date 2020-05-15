@@ -39,30 +39,20 @@ RUN apt-get update \
 
 RUN npm i -g azure-functions-core-tools@3 --unsafe-perm true
 
-# Install Terraform
-RUN wget https://releases.hashicorp.com/terraform/0.12.21/terraform_0.12.21_linux_amd64.zip \
-    && unzip terraform_0.12.21_linux_amd64.zip \
-    && mv terraform /usr/local/bin/ \
-    && rm terraform_0.12.21_linux_amd64.zip
-
-
- RUN    if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
-        groupmod --gid $USER_GID $USERNAME \
-        && usermod --uid $USER_UID --gid $USER_GID $USERNAME \
-        && chown -R $USER_UID:$USER_GID /home/$USERNAME; \
-    fi \
-    # [Optional] Add add sudo support for non-root user
-    && apt-get install -y sudo \
-    && echo node ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
-    #
-    # Install eslint and typescript
-    && npm install -g typescript eslint \
-    #
-    # Clean up
-    && apt-get autoremove -y \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*
+RUN    if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
+      groupmod --gid $USER_GID $USERNAME \
+      && usermod --uid $USER_UID --gid $USER_GID $USERNAME \
+      && chown -R $USER_UID:$USER_GID /home/$USERNAME; \
+  fi \
+  # [Optional] Add add sudo support for non-root user
+  && apt-get install -y sudo \
+  && echo node ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME \
+  #
+  # Clean up
+  && apt-get autoremove -y \
+  && apt-get clean -y \
+  && rm -rf /var/lib/apt/lists/*
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog

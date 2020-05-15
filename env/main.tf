@@ -171,6 +171,22 @@ module "fa_patient_api" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
+resource "null_resource" "deploy_patient_api" {
+  triggers = {
+        build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name}"
+    working_dir = "../src/PatientTestsApi"
+    interpreter = ["bash", "-c"]
+  }
+  depends_on = [
+    module.fa_patient_api
+  ]
+}
+
+
+
 # Audit API
 module "fa_audit_api" {
   source                           = "./modules/function_app"
@@ -189,6 +205,20 @@ module "fa_audit_api" {
   }
 
   key_vault_id = azurerm_key_vault.kv.id
+}
+
+resource "null_resource" "deploy_audit_api" {
+  triggers = {
+        build_number = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name}"
+    working_dir = "../src/AuditApi"
+    interpreter = ["bash", "-c"]
+  }
+  depends_on = [
+    module.fa_audit_api
+  ]
 }
 
 # Function App Host Key
@@ -247,10 +277,14 @@ resource "azurerm_api_management_logger" "logger" {
 # API Management Diagnostic
 # 2020-05-13 Cannot work due to following issue
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/6619
+# The fix will be available in v2.10 of teh Azure provider. 
+# Workaround: Open APIManagement in the portal, select the Patient API in the API list, 
+# open it's settings and set app insights to the logger instance.
 # resource "azurerm_api_management_diagnostic" "diagnostic" {
 #   identifier          = "applicationinsights"
 #   resource_group_name = data.azurerm_resource_group.rg.name
 #   api_management_name = azurerm_api_management.apim.name
+#   api_management_logger_id =  azurerm_api_management_logger.logger.id 
 # }
 
 # API Management Backend
