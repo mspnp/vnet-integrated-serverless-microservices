@@ -8,7 +8,7 @@ export class PatientDataService implements IPatientDataService {
 
   }
 
-  public async insertPatient (patient: IPatient): Promise<string> {
+  public async insertPatient(patient: IPatient): Promise<string> {
     const dbPatient: IDBPatient = {
       ...patient,
       _id: patient.id!,
@@ -22,6 +22,19 @@ export class PatientDataService implements IPatientDataService {
     else {
       throw new InsertFailedError();
     }
+  }
+
+  public async findPatient(id: string): Promise<IPatient | null> {
+    const filter = { id };
+    const result: IPatient = await this.collection.findOne(filter) as IPatient;
+
+    if (result) {
+      // remove database properties
+      delete result._id;
+      delete result._shardKey;
+    }
+
+    return result;
   }
 }
 

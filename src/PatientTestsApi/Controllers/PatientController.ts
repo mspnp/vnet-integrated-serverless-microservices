@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { IAuditService } from "../Services/IAuditService";
 import { IAuditResource } from "../Services/AuditService";
 import { AuditingErrorResponse } from "../Models/AuditingErrorResponse";
+import { NotFoundResponse } from "../Models/NotFoundResponse";
+import { ApiResponse } from "../Models/ApiResponse";
 
 export class PatientController {
   public constructor(
@@ -40,6 +42,27 @@ export class PatientController {
     await this.patientDataService.insertPatient(patient);
     
     return new CreatedResponse(patient);
+  }
+
+  public async findPatient(req: HttpRequest): Promise<IResponse> {
+    const registrationId = req.params['registration-id'];
+
+    if (!registrationId || registrationId.length === 0) {
+      return new BadRequestResponse("Missing registration id");
+    }
+   
+    try {
+      await this.auditService.LogAuditRecord(this.createAuditResource(registrationId, "find"));
+    } catch (error) {
+      return new AuditingErrorResponse(error);
+    }
+    
+    const patient: IPatient | null = await this.patientDataService.findPatient(registrationId);
+    
+    if (!patient)
+      return new NotFoundResponse("Patient not found");
+    else
+      return new ApiResponse(patient);
   }
 
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {

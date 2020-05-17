@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CollectionInsertOneOptions, InsertOneWriteOpResult, MongoError } from "mongodb";
+import { CollectionInsertOneOptions, FilterQuery, FindOneOptions, InsertOneWriteOpResult, MongoError } from "mongodb";
 import { ICollection } from "./ICollection";
 import { IRetryPolicy } from "./IRetryPolicy";
 import { DefaultRetryPolicy } from "./DefaultRetryPolicy";
@@ -13,6 +13,12 @@ export class RetryCollection implements ICollection {
   ): Promise<InsertOneWriteOpResult<any>> {
     return this.retryWrapper(
       async (): Promise<any> => this.collection.insertOne(docs, options)
+    );
+  }
+
+  public async findOne(filter: FilterQuery<any>, options?: FindOneOptions): Promise<any> {
+    return this.retryWrapper(
+      async(): Promise<any> => this.collection.findOne(filter, options)
     );
   }
   

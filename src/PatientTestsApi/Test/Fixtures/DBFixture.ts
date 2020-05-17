@@ -30,8 +30,8 @@ export class DBFixture {
   }
 
   public async cleanPatients(): Promise<void> {
-    await this.mongoDb.collection(this.settings.patientCollection)
-        .deleteOne({ _id: PatientFixture.CreatePatientId, _shardKey: PatientFixture.CreatePatientId });
+    // this now works on Cosmos/Mongo 3.6
+    await this.mongoDb.collection(this.settings.patientCollection).deleteMany({});
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
