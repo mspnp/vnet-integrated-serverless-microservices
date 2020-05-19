@@ -6,9 +6,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "get"
+        "post"
       ],
-      "route": "patient/{patientId}"
+      "route": "patient/{patientId}/test"
     },
     {
       "type": "http",
@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/LoadPatient/index.js"
+  "scriptFile": "../dist/CreateTest/index.js"
 }

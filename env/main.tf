@@ -61,6 +61,15 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
   throughput          = 400
 }
 
+resource "azurerm_cosmosdb_mongo_collection" "coll_test" {
+  name                = "tests"
+  resource_group_name = azurerm_cosmosdb_mongo_database.mongodb.resource_group_name
+  account_name        = azurerm_cosmosdb_mongo_database.mongodb.account_name
+  database_name       = azurerm_cosmosdb_mongo_database.mongodb.name
+  shard_key           = "_shardKey"
+  throughput          = 400
+}
+
 resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   name                = "audits"
   resource_group_name = azurerm_cosmosdb_mongo_database.mongodb.resource_group_name
@@ -69,6 +78,7 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   shard_key           = "_shardKey"
   throughput          = 400
 }
+
 
 # Storage Account
 resource "azurerm_storage_account" "sa" {
@@ -346,15 +356,45 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
 XML
 }
 
-# API Operation
-resource "azurerm_api_management_api_operation" "patient_post" {
-  operation_id        = "patient-post"
+# API Operations
+resource "azurerm_api_management_api_operation" "patient_create" {
+  operation_id        = "patient-create"
   api_name            = azurerm_api_management_api.patient.name
   api_management_name = azurerm_api_management_api.patient.api_management_name
   resource_group_name = azurerm_api_management_api.patient.resource_group_name
   display_name        = "Create Patient"
   method              = "POST"
   url_template        = "/"
+}
+
+resource "azurerm_api_management_api_operation" "patient_load" {
+  operation_id        = "patient-load"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Create Patient"
+  method              = "POST"
+  url_template        = "/{patientId}"
+  template_parameter  {
+    name  = "patientId"
+    required = true
+    type = "string"
+  }
+}
+
+resource "azurerm_api_management_api_operation" "test_create" {
+  operation_id        = "test-create"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Create Test"
+  method              = "POST"
+  url_template        = "/{patientId}/test"
+  template_parameter  {
+    name  = "patientId"
+    required = true
+    type = "string"
+  }
 }
 
 # Key Vault

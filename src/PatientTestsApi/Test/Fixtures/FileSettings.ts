@@ -11,6 +11,7 @@ export class FileSettings implements IDevSettings {
     audit_auth_key: string;
   };
   public get patientCollection(): string { return "patients";}
+  public get testCollection(): string { return "tests";}
   public get patientTestDatabase(): string { return this.localSettings.patient_tests_database;}
   public get mongoConnectionString(): string { return this.localSettings.mongo_connection_string;}
   public get allowSelfSignedMongoCert(): boolean { return JSON.parse(this.localSettings.allow_self_signed_mongo_cert || "true");}

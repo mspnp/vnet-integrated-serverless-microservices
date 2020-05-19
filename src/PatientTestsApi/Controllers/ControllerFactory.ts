@@ -11,8 +11,11 @@ import { TraceContext, HttpRequest } from "@azure/functions";
 import { AuditService } from "../Services/AuditService";
 import Axios, { AxiosInstance } from "axios";
 import { HttpDataService } from "../Services/HttpDataService";
+import { TestController } from "./TestController";
+import { TestDataService } from "../Services/TestDataService";
 
 export class ControllerFactory {
+  
 
   private static mongoDb: Promise<Db>;
   private readonly settings: ISettings;
@@ -26,10 +29,19 @@ export class ControllerFactory {
   public async createPatientController(functionContext: TraceContext, request: HttpRequest): Promise<PatientController> {
     const appInsightsService = new AppInsightsService(functionContext, request);
     const collection = await this.CreateCollection(this.settings.patientCollection, appInsightsService);
-    const dataService: PatientDataService = new PatientDataService(collection);
+    const dataService = new PatientDataService(collection);
     const httpDataService = new HttpDataService(ControllerFactory.axiosClient, appInsightsService);
     const auditService = new AuditService(httpDataService, this.settings);
     return new PatientController(dataService, auditService);
+  }
+
+  public async createTestController(functionContext: TraceContext, request: HttpRequest): Promise<TestController> {
+    const appInsightsService = new AppInsightsService(functionContext, request);
+    const collection = await this.CreateCollection(this.settings.patientCollection, appInsightsService);
+    const dataService = new TestDataService(collection);
+    const httpDataService = new HttpDataService(ControllerFactory.axiosClient, appInsightsService);
+    const auditService = new AuditService(httpDataService, this.settings);
+    return new TestController(dataService, auditService);
   }
 
   private async CreateCollection(collectionName: string, appInsightsService: AppInsightsService): Promise<ICollection> {

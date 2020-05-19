@@ -1,5 +1,6 @@
 
 export interface ISettings {
+  testCollection: string;
   patientCollection: string;
   patientTestDatabase: string;
   mongoConnectionString: string;

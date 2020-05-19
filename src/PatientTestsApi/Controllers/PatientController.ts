@@ -45,7 +45,7 @@ export class PatientController {
   }
 
   public async findPatient(req: HttpRequest): Promise<IResponse> {
-    const registrationId = req.params['registration-id'];
+    const registrationId = req.params["patientId"];
 
     if (!registrationId || registrationId.length === 0) {
       return new BadRequestResponse("Missing registration id");

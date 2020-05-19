@@ -13,7 +13,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
 
   it("Won't find a patient that does not exist", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
-    const id = '-123';
+    const id = "-123";
 
     // test
     const createdPatient = await dataService.findPatient(id);
@@ -23,7 +23,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
   it("Can create and find a patient", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
     const expectedPatient = PatientFixture.createPatient();
-    expectedPatient.id = 'newId';    
+    expectedPatient.id = "newId";    
     const id = await dataService.insertPatient(expectedPatient);
 
     // test via standard db query to see first if the record is consistent

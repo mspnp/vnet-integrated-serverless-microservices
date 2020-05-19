@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "npx mocha --timeout 30000 --allow-uncaught --config .mocharc.json 'dist/Test/**/*.spec.js'",
-    "build": "npx tsc",
+    "build": "npx tsc -p ./tsconfig.json",
     "clean": "npx rimraf ./dist ./node_modules",
     "lint": "npx eslint . --ext .ts",
     "build:production": "npm run clean && npm install && npm run build && npm prune --production"
@@ -18,7 +18,7 @@
     "@types/hapi__joi": "^17.1.0",
     "@types/mocha": "^5.2.7",
     "@types/mongodb": "^3.5.16",
-    "@types/node": "^13.13.5",
+    "@types/node": "^13.13.6",
     "@types/uuid": "^7.0.3",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
