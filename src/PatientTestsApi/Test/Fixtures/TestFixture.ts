@@ -26,4 +26,12 @@ export class TestFixture {
     patient.lastUpdated = new Date("2020-05-07T04:20:44.454Z");
     return patient;
   }
+
+  public static createTests(ids: string[]): ITest[] {
+    return ids.map(id => {
+      const test = TestFixture.createTest();
+      test.id = id;
+      return test;
+    });
+  }
 }

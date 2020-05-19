@@ -94,8 +94,9 @@ az login  --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $
 
 Now deploy your environment by applying the terraform configuration:
 ```bash
-terraform apply -input=false -auto-approve -var-file="vars/$ENVIRONMENT.tfvars" -var "project_name=$RESOURCE_GROUP"
+terraform apply -input=false -auto-approve -var-file="vars/$ENVIRONMENT.tfvars" -var "project_name=$RESOURCE_GROUP" -var "build_id=$(date +%s)"
 ```
+The build_id variable is used to determine whether to deploy the function apps' code. It will only deploy the code if the build_id is different from the previous deployment. This value is optional, and defaults to `1`. Not setting it will cause the code to only be deployed the first time you apply the configuration. Specifying `build_id=$(date +%s)` will set it to the current time, forcing it to deploy the code every time you apply the configuration.
 
 Test your setup by making a POST request with the below body to https://{$RESOURCE_GROUP}-apim-dev.azure-api.net/patient/
 

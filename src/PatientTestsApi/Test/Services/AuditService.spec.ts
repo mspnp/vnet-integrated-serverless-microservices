@@ -22,6 +22,9 @@ describe("AuditDataService", async function (): Promise<void> {
   };
 
   it("posts to the audit api with expected parameters", async function (): Promise<void> {
+    if (!settings.auditAPIUrl) {
+      this.skip();
+    }
     const dataServiceMock = mock(HttpDataService);
     const service = createAuditService(instance(dataServiceMock));
     

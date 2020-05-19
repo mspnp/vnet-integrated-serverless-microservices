@@ -1,7 +1,7 @@
 import { PatientController } from "./PatientController";
 import { Db, MongoClient } from "mongodb";
 import { ISettings } from "../Models/ISettings";
-import { ICollection } from "../Services/ICollection";
+import { ICollection, patchMongoCollection } from "../Services/ICollection";
 import { PatientDataService } from "../Services/PatientDataService";
 import { EnvironmentSettings } from "../Models/EnvironmentSettings";
 import { RetryCollection } from "../Services/RetryCollection";
@@ -48,7 +48,7 @@ export class ControllerFactory {
     if (ControllerFactory.mongoDb == null) {
       ControllerFactory.mongoDb = this.createMongoDb();
     }
-    const mongoCollection = (await ControllerFactory.mongoDb).collection(collectionName);
+    const mongoCollection = patchMongoCollection((await ControllerFactory.mongoDb).collection(collectionName));
 
     const retryCollection = new RetryCollection(mongoCollection);
     return new LoggingCollection(retryCollection, appInsightsService, collectionName, this.settings.patientTestDatabase);

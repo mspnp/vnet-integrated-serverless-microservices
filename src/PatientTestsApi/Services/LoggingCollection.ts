@@ -17,7 +17,7 @@ export class LoggingCollection implements ICollection {
     private readonly appInsights: IAppInsightsService,
     private readonly collectionName: string,
     private readonly dbName: string) {}
-
+  
   insertOne(
     docs: any,
     options?: CollectionInsertOneOptions | undefined
@@ -31,11 +31,16 @@ export class LoggingCollection implements ICollection {
     return this.trackDependency(() => this.collection.findOne(filter, options), mongoRequest);
   }
 
+  public async findMany(query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
+    const mongoRequest = JSON.stringify({findMany: {query}});
+    return this.trackDependency(() => this.collection.findMany(query, options), mongoRequest);
+  }
+
   public async updateOne(
     filter: FilterQuery<any>, 
     update: UpdateQuery<any> | Partial<any>, options?: UpdateOneOptions
   ): Promise<UpdateWriteOpResult> {
-    const mongoRequest = JSON.stringify({updateOne: {filter}})
+    const mongoRequest = JSON.stringify({updateOne: {filter}});
     return this.trackDependency(() => this.collection.updateOne(filter, update, options), mongoRequest);
   }
 

@@ -1,6 +1,6 @@
 import { Db, MongoClient } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
-import { ICollection } from "../../Services/ICollection";
+import { ICollection, patchMongoCollection } from "../../Services/ICollection";
 import { FileSettings } from "./FileSettings";
 
 export class DBFixture {
@@ -24,7 +24,7 @@ export class DBFixture {
   }
 
   public createPatientCollection(): ICollection {
-    return this.mongoDb.collection(this.settings.patientCollection);
+    return this.createCollection(this.settings.patientCollection);
   }
 
   public async cleanPatients(): Promise<void> {
@@ -37,7 +37,11 @@ export class DBFixture {
   }
   
   public createTestCollection(): ICollection {
-    return this.mongoDb.collection(this.settings.testCollection);
+    return this.createCollection(this.settings.testCollection);
+  }
+
+  private createCollection(collectionName: string): ICollection {
+    return patchMongoCollection(this.mongoDb.collection(collectionName));
   }
 
   public async cleanTests(): Promise<void> {

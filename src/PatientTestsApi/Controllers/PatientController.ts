@@ -82,7 +82,7 @@ export class PatientController {
 
     // Check if two registration IDs (in URL and data body) exist and are equal
     if (registrationId != req.body.id) {
-      return new BadRequestResponse('Inconsistent registration IDs');
+      return new BadRequestResponse("Inconsistent registration IDs");
     }
     
     // get body
