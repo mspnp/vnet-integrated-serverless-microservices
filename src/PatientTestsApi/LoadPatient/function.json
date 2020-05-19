@@ -1,12 +1,12 @@
 {
   "bindings": [
     {
-      "authLevel": "anonymous",
+      "authLevel": "function",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
       "methods": [
-        "put"
+        "get"
       ],
       "route": "patient/{patientId}"
     },

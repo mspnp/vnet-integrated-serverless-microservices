@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "~> 2.9"
+  version = "~> 2.10"
   features {}
 }
 
@@ -78,7 +78,6 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   shard_key           = "_shardKey"
   throughput          = 400
 }
-
 
 # Storage Account
 resource "azurerm_storage_account" "sa" {
@@ -195,8 +194,6 @@ resource "null_resource" "deploy_patient_api" {
   ]
 }
 
-
-
 # Audit API
 module "fa_audit_api" {
   source                           = "./modules/function_app"
@@ -285,17 +282,12 @@ resource "azurerm_api_management_logger" "logger" {
 }
 
 # API Management Diagnostic
-# 2020-05-13 Cannot work due to following issue
-# https://github.com/terraform-providers/terraform-provider-azurerm/issues/6619
-# The fix will be available in v2.10 of teh Azure provider. 
-# Workaround: Open APIManagement in the portal, select the Patient API in the API list, 
-# open it's settings and set app insights to the logger instance.
-# resource "azurerm_api_management_diagnostic" "diagnostic" {
-#   identifier          = "applicationinsights"
-#   resource_group_name = data.azurerm_resource_group.rg.name
-#   api_management_name = azurerm_api_management.apim.name
-#   api_management_logger_id =  azurerm_api_management_logger.logger.id 
-# }
+resource "azurerm_api_management_diagnostic" "diagnostic" {
+  identifier          = "applicationinsights"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  api_management_name = azurerm_api_management.apim.name
+  api_management_logger_id =  azurerm_api_management_logger.logger.id 
+}
 
 # API Management Backend
 # 2020-05-12 Currently azurerm provider cannot add function app as backend to API Management
@@ -372,13 +364,30 @@ resource "azurerm_api_management_api_operation" "patient_load" {
   api_name            = azurerm_api_management_api.patient.name
   api_management_name = azurerm_api_management_api.patient.api_management_name
   resource_group_name = azurerm_api_management_api.patient.resource_group_name
-  display_name        = "Create Patient"
-  method              = "POST"
+  display_name        = "Load Patient"
+  method              = "GET"
   url_template        = "/{patientId}"
-  template_parameter  {
-    name  = "patientId"
+
+  template_parameter {
+    name     = "patientId"
     required = true
-    type = "string"
+    type     = "string"
+  }
+}
+
+resource "azurerm_api_management_api_operation" "patient_update" {
+  operation_id        = "patient-update"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Update Patient"
+  method              = "PUT"
+  url_template        = "/{patientId}"
+
+  template_parameter {
+    name     = "patientId"
+    required = true
+    type     = "string"
   }
 }
 
