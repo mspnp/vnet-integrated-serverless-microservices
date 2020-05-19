@@ -17,6 +17,7 @@ export class PatientController {
     private readonly auditService: IAuditService
   ) {}
 
+  // Creates a patient 
   public async createPatient(req: HttpRequest): Promise<IResponse> {
     const validationResult = PatientSchema.validate(req.body);
     if (validationResult.error != null) {
@@ -44,6 +45,7 @@ export class PatientController {
     return new CreatedResponse(patient);
   }
 
+  // Finds an existing patient in the database
   public async findPatient(req: HttpRequest): Promise<IResponse> {
     const registrationId = req.params["patientId"];
 
@@ -63,6 +65,42 @@ export class PatientController {
       return new NotFoundResponse("Patient not found");
     else
       return new ApiResponse(patient);
+  }
+
+  // Updates an existing patient
+  public async updatePatient(req: HttpRequest): Promise<IResponse> {
+    const validationResult = PatientSchema.validate(req.body);
+    const registrationId = req.params["patientId"];
+
+    if (validationResult.error != null) {
+      return new BadRequestResponse(validationResult.error.message);
+    }
+
+    if (registrationId == null || registrationId.length == 0) {
+      return new BadRequestResponse("Missing ID parameter in the URL");
+    }
+
+    // Check if two registration IDs (in URL and data body) exist and are equal
+    if (registrationId != req.body.id) {
+      return new BadRequestResponse('Inconsistent registration IDs');
+    }
+    
+    // get body
+    const patient = req.body as IPatient || {};
+    
+    // audit
+    try {
+      await this.auditService.LogAuditRecord(this.createAuditResource(patient.id!, "update"));
+    } catch (error) {
+      return new AuditingErrorResponse(error);
+    }
+
+    // update patient
+    patient.lastUpdated = new Date();
+    const id = await this.patientDataService.updatePatient(patient);
+
+    // returns update
+    return new ApiResponse(patient);
   }
 
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {

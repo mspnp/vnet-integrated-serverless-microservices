@@ -2,6 +2,7 @@ import { IPatientDataService } from "./IPatientDataService";
 import { IPatient } from "../Models/IPatient";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
+import { UpdateFailedError } from "../Models/UpdateFailedError";
 
 export class PatientDataService implements IPatientDataService {
   constructor (private readonly collection: ICollection) {
@@ -35,6 +36,29 @@ export class PatientDataService implements IPatientDataService {
     }
 
     return result;
+  }
+
+  public async updatePatient(patient: IPatient): Promise<string | null> {
+    const dbPatient: IDBPatient = {
+      ...patient,
+      _id: patient.id!,
+      _shardKey: patient.id!
+    };
+
+    const filter = { _id: dbPatient._id, _shardKey: dbPatient._shardKey };
+    const result = await this.collection.updateOne(
+      filter,
+      {
+        $set: patient
+      }
+    );
+
+    if (result.modifiedCount > 0) {
+      return patient.id!;
+    }
+    else {
+      throw new UpdateFailedError();
+    }
   }
 }
 

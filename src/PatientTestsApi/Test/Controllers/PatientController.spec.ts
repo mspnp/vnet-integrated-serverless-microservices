@@ -12,6 +12,7 @@ import { DownstreamError } from "../../Models/DownstreamError";
 import * as HttpStatus from "http-status-codes";
 import { AuditingErrorResponse } from "../../Models/AuditingErrorResponse";
 import { NotFoundResponse } from "../../Models/NotFoundResponse";
+import { UpdateFailedError } from "../../Models/UpdateFailedError";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPatientRequest(body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
@@ -167,5 +168,78 @@ describe("PatientController", async function (): Promise<void> {
     const patientResult = result.body as IPatient;
     expect(result.status).to.equal(HttpStatus.OK);
     expect(patientResult.id).to.equal(PatientFixture.CreatePatientId);
+  });
+
+  it("Fails updating an invalid patient.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createPatientRequest();
+
+    // configure request
+    request.body.firstName = null;
+
+    // call update
+    const result = await controller.updatePatient(request);
+    expect(result).to.be.instanceOf(BadRequestResponse);
+  });
+
+  it("Fails updating patient with invalid URL id", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createPatientRequest();
+
+    // configure request
+    request.params["patientId"] = '1';
+
+    // call update
+    const result = await controller.updatePatient(request);
+    expect(result).to.be.instanceOf(BadRequestResponse);
+    expect(result.body).to.equal("Inconsistent registration IDs");
+  });
+
+  it("Handles a failed update", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createPatientRequest();
+
+    // configure request
+    request.body.id = uuidv4();
+    request.params["patientId"] = request.body.id;
+
+    // configure mock
+    when(dataServiceMock.updatePatient(anything())).thenThrow(new UpdateFailedError());
+
+    // call update
+    try {
+      const result = await controller.updatePatient(request);
+    }
+    catch (e) {
+      expect(e).to.be.instanceOf(UpdateFailedError);
+    }
+  });
+
+  it("Updates a patient", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createPatientRequest();
+
+    // configure request
+    request.body.id = uuidv4();
+    request.params["patientId"] = request.body.id;
+
+    // configure mock
+    const patient = PatientFixture.createPatient();
+    patient.id = request.body.id;
+    when(dataServiceMock.updatePatient(anything())).thenResolve(patient.id!);
+
+    // call update
+    const result = await controller.updatePatient(request);
+    expect(result).not.to.be.null;
+    
+    // deep check
+    const requestedPatient = request.body as IPatient;
+    const receivedPatient = result.body as IPatient;
+    patient.lastUpdated = receivedPatient.lastUpdated;
+    expect(receivedPatient).to.be.deep.equal(requestedPatient);
   });
 });

@@ -22,7 +22,7 @@ describe("RetryCollection", async function (): Promise<void> {
 
     expect(result).is.equal(expectedResult);
     verify(mockCollection.insertOne(expectedDoc, anything())).thrice();
-    expect(elapsedTime).is.greaterThan(2000);
+    expect(elapsedTime).is.greaterThan(1999);
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
