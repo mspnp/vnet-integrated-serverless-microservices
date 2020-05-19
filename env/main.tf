@@ -182,13 +182,15 @@ module "fa_patient_api" {
 
 resource "null_resource" "deploy_patient_api" {
   triggers = {
-        build_number = var.build_id
+    build_number = var.build_id
   }
+
   provisioner "local-exec" {
-    command = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name}"
+    command     = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name}"
     working_dir = "../src/PatientTestsApi"
     interpreter = ["bash", "-c"]
   }
+
   depends_on = [
     module.fa_patient_api
   ]
@@ -216,13 +218,15 @@ module "fa_audit_api" {
 
 resource "null_resource" "deploy_audit_api" {
   triggers = {
-        build_number = var.build_id
+    build_number = var.build_id
   }
+
   provisioner "local-exec" {
-    command = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name}"
+    command     = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name}"
     working_dir = "../src/AuditApi"
     interpreter = ["bash", "-c"]
   }
+
   depends_on = [
     module.fa_audit_api
   ]
@@ -233,7 +237,7 @@ resource "null_resource" "deploy_audit_api" {
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/699
 # Patient API Host Key
 data "external" "fa_patient_api_host_key" {
-  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}/host/default/listKeys?api-version=2018-11-01 --query functionKeys"]
+  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
 
   depends_on = [
     module.fa_patient_api
@@ -242,7 +246,7 @@ data "external" "fa_patient_api_host_key" {
 
 # Audit API Host Key
 data "external" "fa_audit_api_host_key" {
-  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_audit_api.name}/host/default/listKeys?api-version=2018-11-01 --query functionKeys"]
+  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_audit_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
 
   depends_on = [
     module.fa_audit_api
@@ -268,6 +272,15 @@ resource "azurerm_api_management" "apim" {
   identity {
     type = "SystemAssigned"
   }
+}
+
+# API Management Master Key
+data "external" "apim_master_key" {
+  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.ApiManagement/service/${azurerm_api_management.apim.name}/subscriptions/master/listSecrets?api-version=2019-12-01"]
+
+  depends_on = [
+    azurerm_api_management.apim
+  ]
 }
 
 # API Management Logger

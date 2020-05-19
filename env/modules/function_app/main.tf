@@ -14,6 +14,7 @@ resource "azurerm_function_app" "fa" {
     {
       FUNCTIONS_WORKER_RUNTIME       = "node"
       WEBSITE_NODE_DEFAULT_VERSION   = "~12"
+      WEBSITE_RUN_FROM_PACKAGE       = "1"
       FUNCTION_APP_EDIT_MODE         = "readonly"
       APPINSIGHTS_INSTRUMENTATIONKEY = var.app_insights_instrumentation_key
     },
