@@ -1,3 +1,5 @@
 # Terraform
 .terraform/
 env/.env
+
+*.~vsdx

@@ -1,5 +1,5 @@
 # Project Newcastle
-This repo contains a sample showcasing a key part of a recent customer engagement. We've distilled it down to the main technical lessons learned to serve as a scaffold for future work. The majority of business logic and detail related to data models have been removed to simplify the code.  
+This repo contains a sample showcasing a key part of a recent customer engagement. We've distilled it down to the main technical lessons learned to serve as a scaffold for future work. The majority of business logic and detail related to data models have been removed to simplify the code; this extends to security and infrastructure elements.
 
 ## Scenario
 The organisation needs to digitally store the results of patient medical tests. Other internal and third-party systems will need to interface with this data via an API that allows reading and writing of the data. These interactions need to be recorded in an audit register. Access to the API needs to be managed by a system that allows for easy integration with different authentication mechanisms. APIs should not be publically accessible outside of a single managed endpoint. All code and infrastructure deployment should be automated.
