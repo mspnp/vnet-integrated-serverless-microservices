@@ -174,7 +174,7 @@ module "fa_patient_api" {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
     patient_tests_database  = "newcastle"
     audit_api_url           = "https://${module.fa_audit_api.default_hostname}/api/auditrecord"
-    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.fa_audit_api_host_key.id})"
+    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.fa_audit_api_host_key.id})"
   }
 
   key_vault_id = azurerm_key_vault.kv.id
@@ -337,20 +337,20 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
   <inbound>
     <base />
     <!-- Look for func-host-key in the cache -->
-    <cache-lookup-value key="func-host-key" variable-name="funchostkey" />
+    <cache-lookup-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
     <!-- If API Management doesn’t find it in the cache, make a request for it and store it -->
     <choose>
       <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
         <!-- Make HTTP request to get function host key -->
         <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
-          <set-url>${azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
+          <set-url>${data.azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
           <set-method>GET</set-method>
           <authentication-managed-identity resource="https://vault.azure.net" />
         </send-request>
         <!-- Store response body in context variable -->
         <set-variable name="funchostkey" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" />
         <!-- Store result in cache -->
-        <cache-store-value key="func-host-key" value="@((string)context.Variables["funchostkey"])" duration="100000" />
+        <cache-store-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" value="@((string)context.Variables["funchostkey"])" duration="100000" />
       </when>
     </choose>
     <set-header name="x-functions-key" exists-action="override">
@@ -500,6 +500,11 @@ resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
   ]
 }
 
+data "azurerm_key_vault_secret" "fa_patient_api_host_key" {
+  name         = azurerm_key_vault_secret.fa_patient_api_host_key.name
+  key_vault_id = azurerm_key_vault_secret.fa_patient_api_host_key.key_vault_id
+}
+
 resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
   name         = "fa-audit-api-host-key"
   value        = data.external.fa_audit_api_host_key.result.default
@@ -508,4 +513,9 @@ resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
   depends_on = [
     azurerm_key_vault_access_policy.sp
   ]
+}
+
+data "azurerm_key_vault_secret" "fa_audit_api_host_key" {
+  name         = azurerm_key_vault_secret.fa_audit_api_host_key.name
+  key_vault_id = azurerm_key_vault_secret.fa_audit_api_host_key.key_vault_id
 }
