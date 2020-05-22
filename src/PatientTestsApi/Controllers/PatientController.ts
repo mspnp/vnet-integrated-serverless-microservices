@@ -1,5 +1,5 @@
 import { HttpRequest } from "@azure/functions";
-import { IPatient, PatientSchema } from "../Models/IPatient";
+import { IPatient, PatientSchema, IPatientSearch, PatientSearchSchema } from "../Models/IPatient";
 import { IResponse } from "../Models/IResponse";
 import { IPatientDataService } from "../Services/IPatientDataService";
 import { CreatedResponse} from "../Models/CreatedResponse";
@@ -47,19 +47,19 @@ export class PatientController {
 
   // Finds an existing patient in the database
   public async findPatient(req: HttpRequest): Promise<IResponse> {
-    const registrationId = req.params["patientId"];
+    const patientId = req.params["patientId"];
 
-    if (!registrationId || registrationId.length === 0) {
+    if (!patientId || patientId.length === 0) {
       return new BadRequestResponse("Missing registration id");
     }
    
     try {
-      await this.auditService.LogAuditRecord(this.createAuditResource(registrationId, "find"));
+      await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
     } catch (error) {
       return new AuditingErrorResponse(error);
     }
     
-    const patient: IPatient | null = await this.patientDataService.findPatient(registrationId);
+    const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
     
     if (!patient)
       return new NotFoundResponse("Patient not found");
@@ -70,18 +70,18 @@ export class PatientController {
   // Updates an existing patient
   public async updatePatient(req: HttpRequest): Promise<IResponse> {
     const validationResult = PatientSchema.validate(req.body);
-    const registrationId = req.params["patientId"];
+    const patientId = req.params["patientId"];
 
     if (validationResult.error != null) {
       return new BadRequestResponse(validationResult.error.message);
     }
 
-    if (registrationId == null || registrationId.length == 0) {
+    if (patientId == null || patientId.length == 0) {
       return new BadRequestResponse("Missing ID parameter in the URL");
     }
 
     // Check if two registration IDs (in URL and data body) exist and are equal
-    if (registrationId != req.body.id) {
+    if (patientId != req.body.id) {
       return new BadRequestResponse("Inconsistent registration IDs");
     }
     
@@ -97,10 +97,36 @@ export class PatientController {
 
     // update patient
     patient.lastUpdated = new Date();
-    const id = await this.patientDataService.updatePatient(patient);
+    await this.patientDataService.updatePatient(patient);
 
     // returns update
     return new ApiResponse(patient);
+  }
+
+  // Searches for patients in the database
+  public async searchPatient(req: HttpRequest): Promise<IResponse> {
+    const validationResult = PatientSearchSchema.validate(req.body);
+    
+    if (validationResult.error != null) {
+      return new BadRequestResponse(validationResult.error.message);
+    }
+    
+    // get body
+    const patientSearch = req.body as IPatientSearch;
+
+    try {
+      const resource = JSON.stringify(req.body);
+      await this.auditService.LogAuditRecord(this.createAuditResource(resource, "search"));
+    } catch (error) {
+      return new AuditingErrorResponse(error);
+    }
+    
+    const patients: IPatient[] = await this.patientDataService.searchPatient(patientSearch);
+    
+    if (patients.length === 0)
+      return new NotFoundResponse("No patients found with provided criteria");
+    else
+      return new ApiResponse(patients);
   }
 
   private createAuditResource(newPatientId: string, operation: string): IAuditResource {

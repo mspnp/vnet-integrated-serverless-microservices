@@ -7,12 +7,13 @@ import { BadRequestResponse } from "../../Models/BadRequestResponse";
 import { v4 as uuidv4 } from "uuid";
 import { PatientFixture } from "../Fixtures/PatientFixture";
 import { IAuditService } from "../../Services/IAuditService";
-import { IPatient } from "../../Models/IPatient";
+import { IPatient, IPatientSearch } from "../../Models/IPatient";
 import { DownstreamError } from "../../Models/DownstreamError";
 import * as HttpStatus from "http-status-codes";
 import { AuditingErrorResponse } from "../../Models/AuditingErrorResponse";
 import { NotFoundResponse } from "../../Models/NotFoundResponse";
 import { UpdateFailedError } from "../../Models/UpdateFailedError";
+import { isObjectEmpty } from "../../Util/Utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPatientRequest(body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
@@ -189,7 +190,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createPatientRequest();
 
     // configure request
-    request.params["patientId"] = '1';
+    request.params["patientId"] = "1";
 
     // call update
     const result = await controller.updatePatient(request);
@@ -211,7 +212,7 @@ describe("PatientController", async function (): Promise<void> {
 
     // call update
     try {
-      const result = await controller.updatePatient(request);
+      await controller.updatePatient(request);
     }
     catch (e) {
       expect(e).to.be.instanceOf(UpdateFailedError);
@@ -241,5 +242,69 @@ describe("PatientController", async function (): Promise<void> {
     const receivedPatient = result.body as IPatient;
     patient.lastUpdated = receivedPatient.lastUpdated;
     expect(receivedPatient).to.be.deep.equal(requestedPatient);
+  });
+
+  it("Returns validation error if patient search is not valid.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // configure request
+    request.body = {
+      invalid: "attribute"
+    };
+
+    // response
+    when(dataServiceMock.searchPatient(anything())).thenResolve([]);
+    
+    const result = await controller.searchPatient(request);
+    expect(result).to.be.an.instanceOf(BadRequestResponse);
+  });
+
+  it("Returns not found if patient is not found in search.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+
+    // config request
+    request.body = {};
+    
+    // response
+    when(dataServiceMock.searchPatient(anything())).thenResolve([]);
+    
+    const result = await controller.searchPatient(request);
+    expect(result).to.be.an.instanceOf(NotFoundResponse);
+    expect(result.body).to.equal("No patients found with provided criteria");
+  });
+
+  it("Returns patients found by the search.", async function (): Promise<void> {
+    const dataServiceMock = mock<IPatientDataService>();
+    const controller = createController(instance(dataServiceMock));
+    const request = createEmptyRequest();
+    const mockSearchRequest = instance(mock<IPatientSearch>());
+
+    // configure response
+    const patients = [
+      PatientFixture.createPatient(),
+      PatientFixture.createPatient(),
+      PatientFixture.createPatient()
+    ];
+
+    // response
+    request.body = mockSearchRequest;
+    when(dataServiceMock.searchPatient(mockSearchRequest)).thenResolve(patients);
+    
+    // test
+    const result = await controller.searchPatient(request);
+
+    // verify argument is correct
+    verify(dataServiceMock.searchPatient(mockSearchRequest)).once();
+    const [argument] = capture(dataServiceMock.searchPatient).last();
+    expect(argument).is.not.undefined;
+    expect(isObjectEmpty(argument)).to.be.true;
+
+    const patientResults = result.body as IPatient[];
+    expect(result.status).to.equal(HttpStatus.OK);
+    expect(patientResults.length).to.equal(patients.length);
   });
 });

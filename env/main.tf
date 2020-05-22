@@ -404,6 +404,16 @@ resource "azurerm_api_management_api_operation" "patient_update" {
   }
 }
 
+resource "azurerm_api_management_api_operation" "patient_search" {
+  operation_id        = "patient-search"
+  api_name            = azurerm_api_management_api.patient.name
+  api_management_name = azurerm_api_management_api.patient.api_management_name
+  resource_group_name = azurerm_api_management_api.patient.resource_group_name
+  display_name        = "Search Patient"
+  method              = "POST"
+  url_template        = "/search"
+}
+
 resource "azurerm_api_management_api_operation" "test_create" {
   operation_id        = "test-create"
   api_name            = azurerm_api_management_api.patient.name

@@ -1,4 +1,4 @@
-import { IPatient } from "../../Models/IPatient";
+import { IPatient, IPatientSearch } from "../../Models/IPatient";
 import { Gender } from "../../Models/Gender";
 
 export class PatientFixture {
@@ -22,6 +22,13 @@ export class PatientFixture {
     patient.id = PatientFixture.CreatePatientId;
     patient.lastUpdated = new Date("2020-05-07T04:20:44.454Z");
     return patient;
+  }
+
+  public static createSimplePatientSearch(): IPatientSearch {
+    const patient: IPatient = PatientFixture.createPatientForCreatingInDb();
+    delete patient.dateOfBirth;
+
+    return patient as IPatientSearch;
   }
 }
 
