@@ -24,6 +24,8 @@ local.settings.json
 
 node_modules
 dist
+.coverage
+.nyc_output
 
 # Local python packages
 .python_packages/

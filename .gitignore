@@ -3,3 +3,5 @@
 env/.env
 
 *.~vsdx
+
+azure-functions-core-tools

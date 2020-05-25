@@ -23,6 +23,7 @@
 	"extensions": [
 		"ms-azuretools.vscode-azurefunctions",
 		"dbaeumer.vscode-eslint",
-		"mauve.terraform"
+		"mauve.terraform",
+		"davidanson.vscode-markdownlint"
 	]
 }

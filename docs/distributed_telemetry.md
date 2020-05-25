@@ -30,7 +30,7 @@ Exact instructions for running the terraform deployment is available in the [`/e
 1. To see the telemetry that has been gathered, open the App Insights instance that you created in the Azure Portal:
 ![Open Appinsights](images/OpenAppInsights.png)
 
-2. You can view live telemetry by clicking on the Live Metrics button in the left menu list. This will show most of the telemetry as it comes in, along with metrics from the server. Post a new patient to the API Management instance to see the telemetry stream:
+2. You can view live telemetry by clicking on the Live Metrics button in the left menu list. This will show most of the telemetry as it comes in, along with metrics from the server. Post a new patient to the API Management instance to see the telemetry stream. A sample payload is available in the [PatientTests API readme](../src/PatientTestsApi/readme.md):
 ![View Live Metrics](images/ViewLiveMetrics.png)
 
 3. To see the full transaction detail, open the search blade from the left sidebar menu. Telemetry may take a few minutes to show up in this view:

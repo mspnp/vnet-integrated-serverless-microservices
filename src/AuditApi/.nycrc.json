@@ -1,0 +1,18 @@
+{
+  "all": true,
+  "branches": 0,
+  "lines": 0,
+  "functions": 0,
+  "statements": 0,
+  "check-coverage": true,
+  "exclude": [".ignore", ".coverage", "dist/Test"],
+  "exclude-after-remap": false,
+  "report-dir": "./.coverage/",
+  "cache": false,
+  "source-map": true,
+  "produce-source-map": true,
+  "reporter": [
+    "html",
+    "lcov"
+  ]
+}
