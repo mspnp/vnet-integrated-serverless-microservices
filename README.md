@@ -20,7 +20,7 @@ The Audit API is locked down to only be accessible at a network level from other
 
 ## Distributed Telemetry
 
-Telemetry is captured across the whole request pipeline from API Management and the Functions. Telemetry shares a common operation id, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found [here](docs/DistributedTelemetry.md).
+Telemetry is captured across the whole request pipeline from API Management and the Functions. Telemetry shares a common operation id, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found [here](docs/distributed_telemetry.md).
 
 ## The code
 
