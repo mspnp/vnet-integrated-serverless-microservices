@@ -37,7 +37,7 @@ export class ControllerFactory {
 
   public async createTestController(functionContext: TraceContext, request: HttpRequest): Promise<TestController> {
     const appInsightsService = new AppInsightsService(functionContext, request);
-    const collection = await this.CreateCollection(this.settings.patientCollection, appInsightsService);
+    const collection = await this.CreateCollection(this.settings.testCollection, appInsightsService);
     const dataService = new TestDataService(collection);
     const httpDataService = new HttpDataService(ControllerFactory.axiosClient, appInsightsService);
     const auditService = new AuditService(httpDataService, this.settings);
