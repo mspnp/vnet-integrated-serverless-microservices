@@ -1,0 +1,105 @@
+nameOverride: ""
+fullnameOverride: ""
+
+azureFile:
+
+  shares: 
+    test: locust-tasks 
+    results: locust-results
+  storage:
+    name: ""
+    key: ""
+
+locust:
+
+  # Host targeted for load testing
+  targetHost: ""
+
+  # Path for the file that defines the locust tasks
+  filePath: "/locust-tasks/tests/tasks.py"
+
+  # Total no of concurrent locust clients
+  clients: 100
+
+  # Rate per second in which clients are spawned
+  hatchRate: 20
+
+  # Stop after the specified amount of time, e.g. (300s, 20m, 3h, 1h30m, etc.)
+  runTime: 10m
+
+  stepLoad:
+    enabled: true
+    clients: 20
+    # Step duration in Step Load mode, e.g. (300s, 20m, 3h, 1h30m, etc.)
+    stepTime: 5m 
+
+  # Log level of locust components - DEBUG/INFO/WARNING/ERROR/CRITICAL
+  logLevel: "INFO"
+
+master:
+
+  config:
+    # Override the locust options param if there is something specific that is not supported above.
+    # Run `docker run -it --rm locustio/locust:0.14.5 locust --help` for a full list of options
+    #
+    # Examples:
+    # locustOpts: "--no-web --expect-slaves 50 --clients 2000 --hatch-rate 20 --run-time 2m --csv /locust-results/results --loglevel INFO"
+    # locustOpts: "--no-web --expect-slaves 10 --clients 1000 --hatch-rate 20 --csv /locust-tasks/results --loglevel INFO"
+    # locustOpts: "--no-web --expect-slaves 10 --clients 100 --hatch-rate 20 --step-load --step-clients 20 --step-time 5m --loglevel INFO"
+    locustOpts: ""
+
+  image: locustio/locust:0.14.5
+  replicaCount: 1
+  serviceAccount: locust
+
+  component:
+    web:
+      enabled: false
+
+  service:
+    web:
+      type: LoadBalancer
+      port: 80
+    comms:
+      type: ClusterIP
+      port: 5557
+
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+worker:
+
+  config:
+    # Override the locust options param if there is something specific that is not supported above.
+    # Run `docker run -it --rm locustio/locust:0.14.5 locust --help` for a full list of options
+    #
+    # Examples:
+    # locustOpts: "--loglevel DEBUG"
+    locustOpts: ""
+
+  image: locustio/locust:0.14.5
+  replicaCount: 10
+  serviceAccount: locust
+
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

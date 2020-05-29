@@ -1,0 +1,35 @@
+{{- if .Values.master.component.web.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "locust-web"
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.master.service.web.type }}
+  ports:
+    - name: web
+      port: {{ .Values.master.service.web.port }}
+      targetPort: web
+      protocol: TCP
+  selector:
+    {{- include "locust.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: master
+---
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "locust-comms"
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.master.service.comms.type }}
+  ports:
+    - name: comms
+      port: {{ .Values.master.service.comms.port }}
+      targetPort: comms
+      protocol: TCP
+  selector:
+    {{- include "locust.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: master

@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "locust.fullname" . }}-worker
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  completions: {{ .Values.worker.replicaCount }}
+  parallelism: {{ .Values.worker.replicaCount }}
+  template:
+    metadata:
+      labels:
+        {{- include "locust.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.worker.serviceAccount }}
+      containers:
+        - name: locust-worker
+          image: "{{ .Values.worker.image }}"
+          env:
+            - name: TARGET_URL
+              value: {{ .Values.locust.targetHost | quote }}
+            - name: LOCUST_MODE
+              value: "slave"
+            - name: LOCUST_MASTER_HOST
+              value: "locust-comms"
+            - name: LOCUST_MASTER_PORT
+              value: {{ .Values.master.service.comms.port | quote }}
+            - name: LOCUSTFILE_PATH
+              value: {{ .Values.locust.filePath | quote }}
+            - name: LOCUST_OPTS
+              value: {{ include "locust.worker.locustOpts" . | trim | quote }}
+          volumeMounts:
+            - name: locust-tasks
+              mountPath: /locust-tasks/
+            - name: locust-results
+              mountPath: /locust-results/
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      volumes:
+      - name: locust-tasks
+        azureFile:
+          secretName: locust-storage
+          shareName: {{ .Values.azureFile.shares.test }}
+          readOnly: false
+      - name: locust-results
+        azureFile:
+          secretName: locust-storage
+          shareName: {{ .Values.azureFile.shares.results }}
+          readOnly: false
+      {{- with .Values.worker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

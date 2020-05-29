@@ -28,7 +28,7 @@ In our scenario, we only enabled access restriction and virtual network deployme
 We used Terraform to provision all resources and configurations including the networking lockdown. The complete code can be found in the `/env` folder. We just highlight some code snippets here.
 
 - Access restriction: We can use `ip_restriction` block in `site_config` object to define the access restriction. Note that `ip_address` only accepts CIDR notation, e.g., 1.2.3.4/32 instead of 1.2.3.4. Refer [here](https://www.terraform.io/docs/providers/azurerm/r/function_app.html) for the syntax.
-```
+```terraform
 resource "azurerm_function_app" "fa" {
   ...
   site_config {
@@ -41,7 +41,7 @@ resource "azurerm_function_app" "fa" {
 ```
 
 - Regional virtual network integration: We can use `azurerm_app_service_virtual_network_swift_connection` to implement the regional virtual network integration. Also pay attention to `delegation` block and `service_endpoints` of the subnet in which the function app is deployed. Refer to [here](https://www.terraform.io/docs/providers/azurerm/r/app_service_virtual_network_swift_connection.html) for the syntax. 
-```
+```terraform
 resource "azurerm_subnet" "snet" {
   ...
   delegation {
@@ -101,7 +101,7 @@ In our scenario, we used host keys for both function apps. Where should we store
 Same as networking lockdown, we used Terraform to implement the security pattern for access keys. The complete code can be found in the `/env` folder. We just highlight some code snippets here.
 
 - Keep Cosmos DB connection string in Key Vault
-```
+```terraform
 resource "azurerm_cosmosdb_account" "cosmos" {
   ...
 }
@@ -114,7 +114,7 @@ resource "azurerm_key_vault_secret" "cosmos_conn" {
 ```
 
 - Enable function app MSI and grant GET secret permissiion
-```
+```terraform
 resource "azurerm_function_app" "fa" {
   ...
   identity {

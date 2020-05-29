@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "locust.fullname" . }}-master
+  labels:
+    {{- include "locust.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master
+spec:
+  replicas: {{ .Values.master.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "locust.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: master
+  template:
+    metadata:
+      labels:
+        {{- include "locust.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: master
+    spec:
+      serviceAccountName: {{ .Values.master.serviceAccount }}
+      containers:
+        - name: locust-master
+          image: "{{ .Values.master.image }}"
+          env:
+            - name: TARGET_URL
+              value: {{ .Values.locust.targetHost | quote }}
+            - name: LOCUST_MODE
+              value: "master"
+            - name: LOCUSTFILE_PATH
+              value: {{ .Values.locust.filePath | quote }}
+            - name: LOCUST_OPTS
+              value: {{ include "locust.master.locustOpts" . | trim | quote }}
+          ports:
+            - name: web
+              containerPort: 8089
+              protocol: TCP
+            - name: comms
+              containerPort: 5557
+              protocol: TCP
+          volumeMounts:
+            - name: locust-tasks
+              mountPath: /locust-tasks/
+            - name: locust-results
+              mountPath: /locust-results/
+          resources:
+            {{- toYaml .Values.master.resources | nindent 12 }}
+      volumes:
+      - name: locust-tasks
+        azureFile:
+          secretName: locust-storage
+          shareName: {{ .Values.azureFile.shares.test }}
+          readOnly: false
+      - name: locust-results
+        azureFile:
+          secretName: locust-storage
+          shareName: {{ .Values.azureFile.shares.results }}
+          readOnly: false
+      {{- with .Values.master.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.master.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.master.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
