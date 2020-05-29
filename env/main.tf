@@ -59,6 +59,18 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
   database_name       = azurerm_cosmosdb_mongo_database.mongodb.name
   shard_key           = "_shardKey"
   throughput          = 400
+
+  index { keys = ["id"] }
+  index { keys = ["firstName"] }
+  index { keys = ["lastName"] }
+  index { keys = ["fullName"] }
+  index { keys = ["gender"] }
+  index { keys = ["dateOfBirth"] }
+  index { keys = ["postCode"] }
+  index { keys = ["insuranceNumber"] }
+  index { keys = ["preferredContactNumber"] }
+  index { keys = ["lastUpdated"] }
+  index { keys = ["_dateOfBirthDate"] }
 }
 
 resource "azurerm_cosmosdb_mongo_collection" "coll_test" {
