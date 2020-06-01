@@ -31,3 +31,6 @@ The [PatientTests API](./src/PatientTestsApi/readme.md) and the [Audit API](./sr
 Each of these three folders contain a dev container, which will have all the prerequisites installed, to help you get going quicker.
 
 The APIs are built using Typescript on Azure Functions. Both the PatientTests API and the Audit API have a full suite of automated integration and unit tests. This helps to prevent regressions when any changes are made. It is also set up to do linting using ESLint to maintain code styles and help guard against unintentional errors. The services' respective readme's contain information on how to run the tests and linting.
+
+## Load Test
+The project contains a [Locust load test](./src/LoadTest/README.md) against the API Management in the `/src/LoadTest` folder. [Locust](https://locust.io/) is an open source load testing tool and the tests are written in Python. The load tests can be run locally and remotely in AKS cluster.
