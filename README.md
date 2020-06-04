@@ -35,7 +35,6 @@ The sample shows:
 | `docs`            | Technical writeups.                               |
 | `env`             | Terraform deployment content.                     |
 | `.gitignore`      | Define what to ignore at commit time.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample.        |
 | `README.md`       | This README file.                                 |
 | `LICENSE`         | The license for the sample.                       |
 
