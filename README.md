@@ -58,13 +58,15 @@ The Audit API is locked down to only be accessible at a network level from other
 
 Telemetry is captured across the whole request pipeline from API Management and the Functions. Telemetry shares a common operation id, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found [here](docs/distributed_telemetry.md).
 
-## The code
+## Deployment
 
 The solution may be deployed using Terraform. The terraform templates and code is available in the `/env` folder. The [readme](./env/readme.md) explains how to deploy the environment into your own Azure subscription. This can easily be automated using a system such as Azure DevOps or Github Actions.
 
 The [PatientTests API](./src/PatientTestsApi/readme.md) and the [Audit API](./src/AuditApi/readme.md) may be found in the `/src` folder.
 
 Each of these three folders contain a [dev container](https://code.visualstudio.com/docs/remote/containers), which will have all the prerequisites installed, to help you get going quicker.
+
+## API Source
 
 The APIs are built using Typescript on Azure Functions. Both the PatientTests API and the Audit API have a full suite of automated integration and unit tests. This helps to prevent regressions when any changes are made. It is also set up to do linting using ESLint to maintain code styles and help guard against unintentional errors. The services' respective readme's contain information on how to run the tests and linting.
 
