@@ -198,7 +198,7 @@ resource "null_resource" "deploy_patient_api" {
   }
 
   provisioner "local-exec" {
-    command     = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name}"
+    command     = "npm run build:production && func azure functionapp publish ${module.fa_patient_api.name} --typescript"
     working_dir = "../src/PatientTestsApi"
     interpreter = ["bash", "-c"]
   }
@@ -234,7 +234,7 @@ resource "null_resource" "deploy_audit_api" {
   }
 
   provisioner "local-exec" {
-    command     = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name}"
+    command     = "npm run build:production && func azure functionapp publish ${module.fa_audit_api.name} --typescript"
     working_dir = "../src/AuditApi"
     interpreter = ["bash", "-c"]
   }
