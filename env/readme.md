@@ -64,7 +64,7 @@ export ARM_SUBSCRIPTION_ID="{subscriptionId}"
 export ARM_TENANT_ID="{tenant}"
 ```
 
-Load the values from the .env file using the command `source .env`.
+Load the values from the .env file using the command `source .env`. *This may not work in your setup, leading to issues applying the terraform template and logging in with the service principal. If so, you need to copy the contents of the .env file and execute it directly in your terminal.*
 
 ### Create a storage acount for the backend config
 The `.env` file will set environment variables that determine the name of the resource group, the location, and the storage account used for saving Terraform state.
