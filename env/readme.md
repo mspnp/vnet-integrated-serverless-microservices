@@ -49,7 +49,7 @@ npm install -g azure-functions-core-tools@3
 ## Initialise terraform
 
 ### Authenticate using a service pricipal
-Follow the isntructions [here](https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html) to log in using the Azure CLI, create, and set the service prinicpal for Terraform to use.
+Follow the instructions [here](https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html) to log in using the Azure CLI, create, and set the service prinicpal for Terraform to use.
 
 ### Set environment variables with your Service Principal's information
 Create a copy of the `.env.template` file called `.env`. The `.env` file is ignored by git.
