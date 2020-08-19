@@ -48,7 +48,7 @@ The following diagram represents the architecture of the solution.
 
 ![Solution Architecture](./docs/images/ProjectArchitecture.png)
 
-At the core of the solution is a set of micro-services. The first service (PatientTests API) provides the CRUD operations for patients and their associated tests. The second service (Audit API) provides operations to create auditing entries. Both of these services store data in Cosmos DB, using the Mongo API. The Cosmos DB endpoint can be replaced with another Mongo DB service, without changing code. The services don't share data, and each service may be deployed to it's own independent database. More information regarding the way in which the data is accessed by the APIs can be found *here - placeholder*
+At the core of the solution is a set of micro-services. The first service (PatientTests API) provides the CRUD operations for patients and their associated tests. The second service (Audit API) provides operations to create auditing entries. Both of these services store data in Cosmos DB, using the Mongo API. The Cosmos DB endpoint can be replaced with another Mongo DB service, without changing code. The services don't share data, and each service may be deployed to it's own independent database.
 
 ## Security
 
