@@ -1,4 +1,4 @@
-# Security Pattern for Communication between API Management, Function Apps and Comos DB
+# Security Pattern for Communication between API Management, Function Apps and Cosmos DB
 In our solution architecture below, there is one API Management instance, two Function Apps (plus associated Key Vault) and one Cosmos DB instance. Let's first take patient creation as example to describe the communication among those components and we will talk about Key Vault later.
 1. Other services and clients first make a POST request with a data body including patient information to Patient API in API Management.
 2. Since Patient API uses PatientTests API function app as its backend, it will call `CreatePatient` function in PatientTests API function app with the given patient information.
