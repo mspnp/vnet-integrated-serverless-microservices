@@ -24,7 +24,7 @@ resource "azurerm_function_app" "fa" {
   site_config {
     ip_restriction {
       ip_address = var.ip_restriction_ip_address
-      subnet_id  = var.ip_restriction_subnet_id
+      virtual_network_subnet_id = var.ip_restriction_subnet_id
     }
   }
 
