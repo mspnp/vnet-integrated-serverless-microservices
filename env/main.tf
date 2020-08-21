@@ -155,7 +155,27 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
 }
 
-# Subnet
+# Subnet (APIM)
+resource "azurerm_subnet" "apim-snet" {
+  name                 = "${var.project_name}-apim-snet-${var.environment}"
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.0.96/28"]
+
+  # TF doesn't support APIM as a delegation yet
+  #delegation {
+  #  name = "apimdelegation"
+  #
+  #  service_delegation {
+  #    name    = "Microsoft.ApiManagement/service"
+  #    actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+  #  }
+  #}
+
+  service_endpoints = ["Microsoft.Web"]
+}
+
+# Subnet (web app)
 resource "azurerm_subnet" "snet" {
   name                 = "${var.project_name}-snet-${var.environment}"
   resource_group_name  = data.azurerm_resource_group.rg.name
@@ -185,7 +205,7 @@ module "fa_patient_api" {
   storage_account_name             = azurerm_storage_account.sa.name
   storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
   app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
-  ip_restriction_ip_address        = "${azurerm_api_management.apim.public_ip_addresses[0]}/32"
+  ip_restriction_subnet_id         = azurerm_subnet.apim-snet.id
 
   extra_app_settings = {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
@@ -278,13 +298,18 @@ resource "azurerm_app_service_virtual_network_swift_connection" "vnet_int" {
 
 # API Management
 resource "azurerm_api_management" "apim" {
-  name                = "${var.project_name}-apim-${var.environment}"
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = var.location
-  publisher_name      = var.publisher_name
-  publisher_email     = var.publisher_email
+  name                 = "${var.project_name}-apim-${var.environment}"
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  location             = var.location
+  publisher_name       = var.publisher_name
+  publisher_email      = var.publisher_email
+  virtual_network_type = "External"
 
   sku_name = "Developer_1"
+
+  virtual_network_configuration {
+    subnet_id = azurerm_subnet.apim-snet.id
+  }
 
   identity {
     type = "SystemAssigned"
@@ -467,7 +492,7 @@ resource "azurerm_key_vault" "kv" {
   resource_group_name         = data.azurerm_resource_group.rg.name
   location                    = var.location
   tenant_id                   = data.azurerm_client_config.current.tenant_id
-  soft_delete_enabled         = false
+  soft_delete_enabled         = true
   purge_protection_enabled    = false
 
   sku_name = "standard"
@@ -492,7 +517,7 @@ resource "azurerm_key_vault_access_policy" "apim" {
   object_id    = azurerm_api_management.apim.identity[0].principal_id
 
   secret_permissions = [
-    "get"
+    "Get"
   ]
 }
 
