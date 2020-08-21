@@ -22,9 +22,9 @@ resource "azurerm_function_app" "fa" {
   )
 
   site_config {
+    ftps_state = "Disabled"
     ip_restriction {
-      ip_address = var.ip_restriction_ip_address
-      subnet_id  = var.ip_restriction_subnet_id
+      virtual_network_subnet_id = var.ip_restriction_subnet_id
     }
   }
 
@@ -40,6 +40,6 @@ resource "azurerm_key_vault_access_policy" "fa" {
   object_id    = azurerm_function_app.fa.identity[0].principal_id
 
   secret_permissions = [
-    "get"
+    "Get"
   ]
 }
