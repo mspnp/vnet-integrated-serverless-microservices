@@ -61,6 +61,7 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
   throughput          = 400
 
   index { keys = ["id"] }
+  index { keys = ["_id"] }
   index { keys = ["firstName"] }
   index { keys = ["lastName"] }
   index { keys = ["fullName"] }
@@ -80,6 +81,8 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_test" {
   database_name       = azurerm_cosmosdb_mongo_database.mongodb.name
   shard_key           = "_shardKey"
   throughput          = 400
+
+  index { keys = ["_id"] }
 }
 
 resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
@@ -89,6 +92,8 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   database_name       = azurerm_cosmosdb_mongo_database.mongodb.name
   shard_key           = "_shardKey"
   throughput          = 400
+
+  index { keys = ["_id"] }
 }
 
 # Storage Account
