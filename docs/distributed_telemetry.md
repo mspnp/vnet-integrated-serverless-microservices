@@ -130,7 +130,7 @@ The key here is setting `tagOverrides` using the fields exposed on the `Correlat
 
 #### Add tracking headers to outgoing requests
 
-The request context needs to be passed to downstream services to enable them to tag telemetry with the appropriate operation and parent id's. In Project Newcastle we abstracted http communication in an [`HttpDataService`](../src/PatientTestsApi/Services/HttpDataService.ts). This data service is instantiated in the [`ControllerFactory`](../src/PatientTestsApi/Controllers/ControllerFactory.ts) with an instance of `AppInsightsService`, and passed to the `AuditService`. The `AuditService` uses it to make any outgoing http requests:
+The request context needs to be passed to downstream services to enable them to tag telemetry with the appropriate operation and parent id's. For this implementation, we abstracted http communication in an [`HttpDataService`](../src/PatientTestsApi/Services/HttpDataService.ts). This data service is instantiated in the [`ControllerFactory`](../src/PatientTestsApi/Controllers/ControllerFactory.ts) with an instance of `AppInsightsService`, and passed to the `AuditService`. The `AuditService` uses it to make any outgoing HTTP requests:
 
 ```typescript
 public async LogAuditRecord(expectedResource: IAuditResource): Promise<void> {
