@@ -1,10 +1,10 @@
 # Load Testing with Locust
-Assume API performance is one of your concerns, you may want to use some tools to run load testing against your APIs. In our scenario, we use [Locust](https://locust.io/) to run load testing against API Management. [Locust](https://locust.io/) is an open source load testing tool and you write your load tests in Python. In the following sections, we will first introduce how to write Locust tests and then we will show you how to run Locust tests locally and remotely via AKS.
+Assuming API performance is one of your concerns, you may want to use some tools to run load testing against your APIs. In our scenario, we use [Locust](https://locust.io/) to run load testing against API Management. [Locust](https://locust.io/) is an open source load testing tool and you write your load tests in Python. In the following sections, we will first introduce how to write Locust tests and then we will show you how to run Locust tests locally and remotely via AKS.
 
 ## Writing Locust tests
 To write a Locust test, you need to define two classes:
 - A subclass of TaskSet
-- A subclass of Locust. In our case, we use `FastHttpLocust` for better performance.
+- A subclass of Locust. In our case, we use `FastHttpLocust` for simplicity and great performance.
 
 Let's take a look at load test against Echo API as example. When you create API Management, Echo API is created by default as a simple API example.
 
@@ -45,48 +45,55 @@ After writing Locust tests, you can first run those tests locally to check if yo
 
 ### Prerequisites
 Install Locust with pip:
-```
+
+```bash
 pip install locustio
 ```
 
 ### How to run tests locally
 1. Assign your API Management subscription key to `sub_key` in [variables.py](./tests/locustscripts/variables.py)
-2. Go to [LoadTest](.) folder and run the following command.
-```
+1. Go to [LoadTest](.) folder and run the following command.
+
+```bash
 locust -f tests/tasks.py
 ```
 
-3. Open your browser and go to [localhost:8089](http://localhost:8089/). You need to input three things.
+1. Open your browser and go to [localhost:8089](http://localhost:8089/). You need to input three things.
 - Number of total users
 - Hatch rate
 - Host, in our case it should be the hostname of API Management
 
-If everything works fine, you should be able to see the similar screenshot.
+You should be able to see the similar screenshot.
 
 ![Run Locust locally](../../docs/images/LocustLocal.png)
 
 ## Running Locust tests remotely via AKS
-Although it's very easy to run Locust tests locally, your local machine may not have enough power to simulate huge amounts of users. In that case, you can run Locust tests remotely via AKS. The idea is that you deploy your Locust tests in AKS containers and attack the API Management. Since you use AKS, you have the full control of the infrastructure like how many nodes to provision, how many pods (Locust workers) you want to spin up, etc.
+
+Although it's very easy to run Locust tests locally, your local machine may not have enough power to simulate huge amounts of users. In that case, you can run Locust tests remotely via AKS. The idea is that you deploy your Locust tests in AKS containers and target the API Management gateway. Since you use AKS, you have the full control of the infrastructure ;like how many nodes to provision, how many pods (Locust workers) you want to spin up, etc.
 
 ### Prerequisites
+
 - Bash (to run script)
 - Azure CLI latest version
 - kubectl, you can use `az aks install-cli` to install it after you install Azure CLI
 - Helm 3
 
 ### How to run tests via AKS
+
 1. Assign your API Management subscription key to `sub_key` in [variables.py](./tests/locustscripts/variables.py)
-2. Assign following variables in [azure_cli_deploy_and_run_tests.sh](./scripts/azure_cli_deploy_and_run_tests.sh)
+1. Assign following variables in [azure_cli_deploy_and_run_tests.sh](./scripts/azure_cli_deploy_and_run_tests.sh)
     - `LOCUST_TARGET_HOST`: the hostname of API Management
     - `CLIENT_ID` and `CLIENT_SECRET`: the service principal for AKS authentication
     - `LOCATION`: the region for AKS and storage account
     - `RESOURCE_GROUP`: the resource group for AKS and storage account
-3. Since all scripts are in `azure_cli_deploy_and_run_tests.sh`, just run this bash to run tests in AKS cluster. After running Locust tests, all resources will be deleted automatically.
-4. Check the test results like [sample test results](./sampleresults)
+1. Since all scripts are in `azure_cli_deploy_and_run_tests.sh`, just run this bash to run tests in AKS cluster. After running Locust tests, all resources will be deleted automatically.
+1. Check the test results like [sample test results](./sampleresults)
 
 Below diagram shows how the `azure_cli_deploy_and_run_tests.sh` script works.
 
 ![Run Locust via AKS](../../docs/images/LocustAKS.png)
+
+> NOTE the AKS cluster deployed in the prior step does NOT conform to [Microsoft's published baseline for AKS clusters](https://aka.ms/architecture/aks-baseline). The prior scripts should be used as a point reference and adapted for your specific needs and alignment to the baseline.
 
 ## References
 - [Locust on GitHub](https://github.com/locustio/locust)
