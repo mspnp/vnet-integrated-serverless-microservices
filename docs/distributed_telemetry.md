@@ -2,18 +2,15 @@
 
 ## Overview
 
-Project Newcastle is an example of a microservices based architecture. A common issue with these architectures, is that failures can be caused by a set of circumstances distributed over a variety of components. This can make it hard to diagnose issues, when looking at components in isolation. The ability to correlate the telemetry for an operation across components becomes vital to diagnose certain issues.
-An example might be that Service A have a dependency on Service B. Service A starts experiencing intermittent timeouts on requests to Service B, resulting in an internal server error. Service B does not experience any errors that are being logged, it is just taking too long to serve these requests because of a particular data access pattern associated with the request. By being able to correlate the request across service A and service B, and seeing the surrounding requests in Service B, we can determine which data queries in service B is associated with the timeouts experienced in service A, and take appropriate remedial action.
+A common issue with microservice architectures, is that failures can be caused by a set of circumstances distributed over a variety of components. This can make it hard to diagnose issues, when looking at components in isolation. The ability to correlate the telemetry for an operation across components becomes vital to diagnose certain issues. An example might be that Service A have a dependency on Service B. Service A starts experiencing intermittent timeouts on requests to Service B, resulting in an internal server error. Service B does not experience any errors that are being logged, it is just taking too long to serve these requests because of a particular data access pattern associated with the request. By being able to correlate the request across service A and service B, and seeing the surrounding requests in Service B, we can determine which data queries in service B is associated with the timeouts experienced in service A, and take appropriate remedial action.
 
 ## Solution
 
-Project Newcastle makes use of Application Insights to centralize logging across components. Components contributing to the telemetry includes API Management and the PatientTests and Audit API’s running on Azure Functions.
-API Management and the Azure Functions runtime has built-in support for Application Insights to generate and correlate a wide variety of telemetry, including standard application output. The Application Insights Nodejs SDK is used in the Function apps to manually track dependencies and other custom telemetry.
-The telemetry sent to Application Insights can feed into a wider Azure Monitor workspace. Components such as Cosmos Db can send telemetry to Azure Monitor, where it can be correlated with telemetry from Application Insights. This is beyond the scope of Project Newcastle.
+This architecture makes use of Application Insights to centralize logging across components. Components contributing to the telemetry includes API Management and the PatientTests and Audit APIs running on Azure Functions. API Management and the Azure Functions runtime has built-in support for Application Insights to generate and correlate a wide variety of telemetry, including standard application output. The Application Insights Nodejs SDK is used in the Function apps to manually track dependencies and other custom telemetry. The telemetry sent to Application Insights can feed into a wider Azure Monitor workspace. Components such as Cosmos DB can send telemetry to Azure Monitor, where it can be correlated with telemetry from Application Insights.
 
 ## Configuration
 
-You can use the Terraform templates in the [`/env`](../env) folder to deploy and configure Project Newcastle in your own subscription. This will include deploying Application Management and the Function apps and configuring them to use the deployed Application Insights instance. It automates the following process:
+You can use the Terraform templates in the [`/env`](../env) folder to deploy and configure this solution in your own subscription. This will include deploying API Management and the Function apps and configuring them to use the deployed Application Insights instance. It automates the following process:
 
 1. Deploy Application Insights
 2. Get the Application Insights instrumentation key
@@ -49,20 +46,20 @@ Exact instructions for running the terraform deployment is available in the [`/e
 
 ### Automatic telemetry gathering
 
-Once this environment is correctly configured, API Management will start adding a `request-id` header to the backend requests.
-The Azure Functions runtime will read this header and use it to create a `TraceContext` for the request.  Any telemetry that the runtime logs associated with this request, will have the `operationId` and `parentId` set according to the incoming `request-id` header. This allows App Insights to correlate the Trace, Exception, and Request telemetry from the Azure Functions runtime with the Request telemetry from Azure API Management.
-The NodeJS SDK for Application Insights can also apply automatic dependency gathering to certain libraries such as the mongo driver. We evaluated this in Project Newcastle but found that dependencies were logged inconsistently for the mongo API.
-The SDK can also be configured to add required correlation headers to outgoing http requests. This also didn’t work as expected in an Azure Function app, because the request state was not being set correctly per request. It also required us to create a new TelemetryClient for each request, which may lead to performance issues.
+Once this environment is correctly configured, API Management will start adding a `request-id` header to the backend requests. The Azure Functions runtime will read this header and use it to create a `TraceContext` for the request.  Any telemetry that the runtime logs associated with this request, will have the `operationId` and `parentId` set according to the incoming `request-id` header. This allows Application Insights to correlate the Trace, Exception, and Request telemetry from the Azure Functions runtime with the Request telemetry from Azure API Management.
+
+The NodeJS SDK for Application Insights can also apply automatic dependency gathering to certain libraries such as the mongo driver. We evaluated this but found that dependencies were logged inconsistently for the Mongo API.
+
+The SDK can also be configured to add required correlation headers to outgoing HTTP requests. This also didn’t work as expected in an Azure Function app, because the request state was not being set correctly per request. It also required us to create a new `TelemetryClient` for each request, which may lead to performance issues.
 
 ### Manual Telemetry logging
 
 To fix these two issues, you need to
 
 1. manually track the dependency telemetry
-2. add required context headers to outgoing http requests.
+2. add required context headers to outgoing http requests
 
-To enable this, Azure Functions exposes a `traceContext` object on the context parameter passed to the Azure Functions execution.
-We extracted some code from the NodeJs SDK for Application Insights, and modified it to use this `traceContext` object to populate the neccesary variables and headers when logging a dependency telemetry or an outgoing request. The `traceContext` is passed to the `controllerFactory` when a new controller is requested. You can see this in [`src/PatientTestsApi/CreatePatient/index.ts`](../src/PatientTestsApi/CreatePatient/index.ts):
+To enable this, Azure Functions exposes a `traceContext` object on the context parameter passed to the Azure Functions execution. We extracted some code from the NodeJS SDK for Application Insights, and modified it to use this `traceContext` object to populate the neccesary variables and headers when logging a dependency telemetry or an outgoing request. The `traceContext` is passed to the `controllerFactory` when a new controller is requested. You can see this in [`src/PatientTestsApi/CreatePatient/index.ts`](../src/PatientTestsApi/CreatePatient/index.ts):
 
 ```typescript
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -71,11 +68,11 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 };
 ```
 
-The controller factory injects this into new instances of the `AppInsightsService`, which is used to initialize a `CorrelationContext`. This context is associated with the request. The `AppInsightsService` uses a singleton instance of `TelemetryClient` to prevent http port exhaustion.
+The controller factory injects this into new instances of the `AppInsightsService`, which is used to initialize a `CorrelationContext`. This context is associated with the request. The `AppInsightsService` uses a singleton instance of `TelemetryClient` to prevent HTTP port exhaustion.
 
 #### Tracking dependency telemetry
 
-The `AppInsightsService` is passed along to data services that uses it to log dependencies. An example of this may be found in [`LoggingCollection`](../src/PatientTestsApi/Services/LoggingCollection.ts) This collection wraps calls to other collections (which may be a `Collection` from the mongo driver). It will log information about the call to the underlying collection using the `AppInsightsService.trackDependency` function:
+The `AppInsightsService` is passed along to data services that uses it to log dependencies. An example of this may be found in [`LoggingCollection`](../src/PatientTestsApi/Services/LoggingCollection.ts) This collection wraps calls to other collections (which may be a `Collection` from the Mongo driver). It will log information about the call to the underlying collection using the `AppInsightsService.trackDependency` function:
 
 ```typescript
 private async trackDependency<T>(fn: () => Promise<T>, query: string): Promise<T> {
@@ -160,13 +157,11 @@ const appInsightsHeaders = this.appInsightsService.getHeadersForRequest();
     };
 ```
 
-The `AppInsightsService` generates these headers from the `TraceContext` injected in its contructor.
-Like the `LoggingCollection`, the `HttpDataService` will also log dependency telemetry for the outgoing request.
+The `AppInsightsService` generates these headers from the `TraceContext` injected in its contructor. Like the `LoggingCollection`, the `HttpDataService` will also log dependency telemetry for the outgoing request.
 
 ## Testing
 
-Project Newcastle has a full suite of unit tests. By abstracting the calls to Application Insights within the `AppInsightsService`, it is possible to verify that the data services will log any requests and failures correctly.
-An example of logging dependency tracking for Mongo DB can be found in [`LoggingCollection.spec.ts`](../src/PatientTestsApi/Test/Services/LoggingCollection.spec.ts):
+This implementation has a full suite of unit tests. By abstracting the calls to Application Insights within the `AppInsightsService`, it is possible to verify that the data services will log any requests and failures correctly. An example of logging dependency tracking for Mongo DB can be found in [`LoggingCollection.spec.ts`](../src/PatientTestsApi/Test/Services/LoggingCollection.spec.ts):
 
 ```typescript
 it("Tracks dependencies for succesful database calls", async function(): Promise<void> {
@@ -195,5 +190,4 @@ it("Tracks dependencies for succesful database calls", async function(): Promise
   });
 ```
 
-The tests create a mock implementation of the `AppInsightsService`, and injects it into the LoggingCollection. This allows it to verify that the `trackDependency` function is called with the expected parameters.
-Similar tests exist for the `HttpDataService`.
+The tests create a mock implementation of the `AppInsightsService`, and injects it into the LoggingCollection. This allows it to verify that the `trackDependency` function is called with the expected parameters. Similar tests exist for the `HttpDataService`.
