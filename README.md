@@ -2,7 +2,7 @@
 
 This reference architecture is an end-to-end sample derived from a customer engagement. We've distilled it down to the main technical lessons learned to serve as a scaffold for future work. The majority of business logic and detail related to data models have been removed to simplify the solution; this extends to security and infrastructure elements.
 
-The sample shows:
+The implementation shows:
 
 - managing and deployment using Terraform
 - distributed telemetry using App Insights
