@@ -1,4 +1,4 @@
-# Deploying the environment using teraform
+# Deploying the environment using terraform
 
 ## Prerequisites
 - Terraform
