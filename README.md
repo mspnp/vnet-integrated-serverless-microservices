@@ -2,6 +2,8 @@
 
 This reference architecture is an end-to-end sample derived from a customer engagement. We've distilled it down to the main technical lessons learned to serve as a scaffold for future work. The majority of business logic and detail related to data models have been removed to simplify the solution; this extends to security and infrastructure elements.
 
+There is an accompanying [article in the Azure Architecture Center](https://docs.microsoft.com/azure/architecture/example-scenario/integrated-multiservices/virtual-network-integration) that this reference supports.
+
 The implementation shows:
 
 - managing and deployment using Terraform
