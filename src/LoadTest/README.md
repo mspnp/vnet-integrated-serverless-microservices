@@ -69,7 +69,7 @@ You should be able to see the similar screenshot.
 
 ## Running Locust tests remotely via AKS
 
-Although it's very easy to run Locust tests locally, your local machine may not have enough power to simulate huge amounts of users. In that case, you can run Locust tests remotely via AKS. The idea is that you deploy your Locust tests in AKS containers and target the API Management gateway. Since you use AKS, you have the full control of the infrastructure ;like how many nodes to provision, how many pods (Locust workers) you want to spin up, etc.
+Although it's very easy to run Locust tests locally, your local machine may not have enough power to simulate huge amounts of users. In that case, you can run Locust tests remotely via AKS. The idea is that you deploy your Locust tests in AKS containers and target the API Management gateway. Since you use AKS, you have the full control of the infrastructure; like how many nodes to provision, how many pods (Locust workers) you want to spin up, etc.
 
 ### Prerequisites
 
@@ -93,7 +93,7 @@ Below diagram shows how the `azure_cli_deploy_and_run_tests.sh` script works.
 
 ![Run Locust via AKS](../../docs/images/LocustAKS.png)
 
-> NOTE the AKS cluster deployed in the prior step does NOT conform to [Microsoft's published baseline for AKS clusters](https://aka.ms/architecture/aks-baseline). The prior scripts should be used as a point reference and adapted for your specific needs and alignment to the baseline.
+> NOTE the AKS cluster deployed in the prior step does NOT conform to [Microsoft's published baseline for AKS clusters](https://aka.ms/architecture/aks-baseline). The prior scripts should be used as a point reference and adapted for your specific needs and alignment to the baseline. If you plan on making load testing a normal part of your workflow, please also import image `locustio/locust` into your Azure Container Registry so that you're not taking a depedency on a public container repository which is subject to unexpected outages or throttling.
 
 ## References
 - [Locust on GitHub](https://github.com/locustio/locust)
