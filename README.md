@@ -33,7 +33,7 @@ The implementation shows:
 | File/folder       | Description                                       |
 |-------------------|---------------------------------------------------|
 | `src`             | Sample source code for APIs.                      |
-| `src\LoadTest`    | Source code and deployment scripts for loadtests. |
+| `src\LoadTest`    | Source code and deployment scripts for load tests.|
 | `docs`            | Technical writeups.                               |
 | `env`             | Terraform deployment content.                     |
 | `.gitignore`      | Define what to ignore at commit time.             |
