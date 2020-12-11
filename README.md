@@ -9,7 +9,7 @@ products:
 - azure-application-insights
 - azure-api-management
 - azure-key-vault
-description: "An end-to-end Azure Functions sample. This sample shows distributed telemetry, secret management, networking lockdown, deployment, and load testing."
+description: "An end-to-end Azure Functions sample. This sample shows distributed telemetry, secret management, network lockdown, deployment, and load testing."
 urlFragment: "vnet-integrated-serverless"
 ---
 
