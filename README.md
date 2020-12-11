@@ -1,3 +1,18 @@
+---
+page_type: sample
+languages:
+- typescript
+- terraform
+products:
+- azure-functions
+- azure-cosmos-db
+- azure-application-insights
+- azure-api-management
+- azure-key-vault
+description: "An end-to-end Azure Functions sample. This sample shows distributed telemetry, secret management, networking lockdown, deployment, and load testing."
+urlFragment: "vnet-integrated-serverless"
+---
+
 # Azure VNet-Integrated Serverless Microservices
 
 This reference architecture is an end-to-end sample derived from a customer engagement. We've distilled it down to the main technical lessons learned to serve as a scaffold for future work. The majority of business logic and detail related to data models have been removed to simplify the solution; this extends to security and infrastructure elements.
