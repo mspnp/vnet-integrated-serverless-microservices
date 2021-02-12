@@ -42,11 +42,11 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "applicationinsights": "^1.7.5",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "http-status-codes": "^1.4.0",
-    "mongodb": "^3.5.7",
     "moment": "^2.26.0",
     "moment-timezone": "^0.5.31",
+    "mongodb": "^3.5.7",
     "uuid": "^8.0.0"
   }
 }
