@@ -42,7 +42,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "applicationinsights": "^1.7.5",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "http-status-codes": "^1.4.0",
     "mongodb": "^3.5.7",
     "moment": "^2.26.0",
