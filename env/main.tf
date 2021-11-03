@@ -274,19 +274,21 @@ resource "null_resource" "deploy_audit_api" {
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/699
 # Patient API Host Key
 data "external" "fa_patient_api_host_key" {
-  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
+  program = ["bash", "-c", "sleep 10 && az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
 
   depends_on = [
-    module.fa_patient_api
+    module.fa_patient_api,
+    null_resource.deploy_patient_api
   ]
 }
 
 # Audit API Host Key
 data "external" "fa_audit_api_host_key" {
-  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_audit_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
+  program = ["bash", "-c", "sleep 10 && az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_audit_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
 
   depends_on = [
-    module.fa_audit_api
+    module.fa_audit_api,
+    null_resource.deploy_audit_api
   ]
 }
 
@@ -492,7 +494,6 @@ resource "azurerm_key_vault" "kv" {
   resource_group_name         = data.azurerm_resource_group.rg.name
   location                    = var.location
   tenant_id                   = data.azurerm_client_config.current.tenant_id
-  soft_delete_enabled         = true
   purge_protection_enabled    = false
 
   sku_name = "standard"
