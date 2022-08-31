@@ -46,7 +46,7 @@
     "http-status-codes": "^1.4.0",
     "mongodb": "^3.5.7",
     "moment": "^2.26.0",
-    "moment-timezone": "^0.5.31",
+    "moment-timezone": "^0.5.35",
     "uuid": "^8.0.0"
   }
 }
