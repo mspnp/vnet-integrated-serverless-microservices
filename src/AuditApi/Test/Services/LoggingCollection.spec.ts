@@ -1,6 +1,6 @@
 import { ICollection } from "../../Services/ICollection";
 import { mock, anything, instance, when, capture } from "ts-mockito";
-import { InsertOneWriteOpResult } from "mongodb";
+import { InsertOneResult, ObjectId } from "mongodb";
 import { IAppInsightsService } from "../../Services/app-insights/app-insights-service";
 import { LoggingCollection } from "../../Services/LoggingCollection";
 import { expect } from "chai";
@@ -56,14 +56,10 @@ describe("LoggingCollection", async function (): Promise<void> {
 
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function createOneInsertResult(): InsertOneWriteOpResult<any> {
+  function createOneInsertResult(): InsertOneResult<any> {
     return {
-      insertedCount: 1,
-      ops: [],
-      insertedId: {},
-      connection: {},
-      result: { ok: 1, n: 1 }
+      insertedId: new ObjectId(),
+      acknowledged: true
     };
   }
 });

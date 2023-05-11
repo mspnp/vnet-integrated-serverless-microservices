@@ -1,5 +1,5 @@
 import { AuditRecordFixture } from "./AuditRecordFixture";
-import { Db, MongoClient } from "mongodb";
+import { Db, Document, MongoClient, ObjectId, WithId } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
 import { ICollection } from "../../Services/ICollection";
 import { FileSettings } from "./FileSettings";
@@ -20,7 +20,9 @@ export class DBFixture {
 
     // connect and select database
     this.mongoClient = await MongoClient.connect(this.settings.mongoConnectionString,
-      { useUnifiedTopology: true, useNewUrlParser: true, tlsAllowInvalidCertificates: true });
+      {
+        tlsAllowInvalidCertificates: this.settings.allowSelfSignedMongoCert
+      });
     
     this.mongoDb = this.mongoClient.db(this.settings.auditDatabase);
   }
@@ -30,13 +32,13 @@ export class DBFixture {
   }
 
   public async cleanAuditRecords(): Promise<void> {
-    await this.mongoDb.collection(this.settings.auditCollection)
-        .deleteOne({ _id: AuditRecordFixture.CreateAuditRecordId, _shardKey: AuditRecordFixture.CreateAuditRecordId });
+    const collection = this.mongoDb.collection<Document>(this.settings.auditCollection);
+    await collection
+        .deleteOne({ _id: ObjectId.createFromBase64(AuditRecordFixture.CreateAuditRecordId), _shardKey: AuditRecordFixture.CreateAuditRecordId });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async loadAuditRecord(id: string): Promise<any> {
-    return await this.mongoDb.collection(this.settings.auditCollection).findOne({_id: id});
+  public async loadAuditRecord(id: string): Promise<WithId<Document> | null> {
+    return await this.mongoDb.collection(this.settings.auditCollection).findOne({_id: ObjectId.createFromBase64(id)});
   }
 
   public async close(): Promise<void> {

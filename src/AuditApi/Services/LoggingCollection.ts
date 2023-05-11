@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ICollection } from "./ICollection";
-import { CollectionInsertOneOptions, InsertOneWriteOpResult } from "mongodb";
+import { InsertOneOptions, InsertOneResult } from "mongodb";
 import { Timer } from "./app-insights/timer";
 import { IDependencyTelemetry, IAppInsightsService } from "./app-insights/app-insights-service";
 
@@ -14,8 +13,8 @@ export class LoggingCollection implements ICollection {
 
   insertOne(
     docs: any,
-    options?: CollectionInsertOneOptions | undefined
-  ): Promise<InsertOneWriteOpResult<any>> {
+    options?: InsertOneOptions | undefined
+  ): Promise<InsertOneResult<any>> {
     const mongoRequest = JSON.stringify({insertOne: {options}});
     return this.trackDependency(() => this.collection.insertOne(docs, options), mongoRequest);
   }

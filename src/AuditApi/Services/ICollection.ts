@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { CollectionInsertOneOptions, InsertOneWriteOpResult } from "mongodb";
+import { InsertOneOptions, InsertOneResult } from "mongodb";
 
 export interface ICollection {
-  insertOne(docs: any, options?: CollectionInsertOneOptions): Promise<InsertOneWriteOpResult<any>>;
+  insertOne(docs: any, options?: InsertOneOptions): Promise<InsertOneResult<any>>;
 }
 
 

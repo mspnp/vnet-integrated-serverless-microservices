@@ -7,6 +7,7 @@ const db = new DBFixture();
 
 describe("AuditDataService #integration", async function (): Promise<void> {
   before(async function (): Promise<void> {
+    this.timeout(5000);
     await db.init();
     await db.cleanAuditRecords();
   });
@@ -16,13 +17,13 @@ describe("AuditDataService #integration", async function (): Promise<void> {
     const expectedAuditRecord = AuditRecordFixture.createAuditRecord();
     
     const id = await dataService.insertAuditRecord(expectedAuditRecord);
-
     const createdAuditRecord = await db.loadAuditRecord(id);
+    expect(createdAuditRecord).is.not.null;
     Object.keys(expectedAuditRecord).forEach(key => {
-      expect(createdAuditRecord[key]).deep.equal(expectedAuditRecord[key]);
+      expect(createdAuditRecord![key]).deep.equal(expectedAuditRecord[key]);
     });
-    expect(createdAuditRecord._id).is.equal(id);
-    expect(createdAuditRecord._shardKey).is.equal(id);
+    expect(createdAuditRecord!._id.toString("base64")).is.equal(id);
+    expect(createdAuditRecord!._shardKey).is.equal(id);
   }); 
 
   after(async function (): Promise<void> {

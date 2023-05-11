@@ -2,6 +2,7 @@ import { IAuditDataService } from "./IAuditDataService";
 import { IAuditRecord } from "../Models/IAuditRecord";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
+import { ObjectId } from "mongodb";
 
 export class AuditDataService implements IAuditDataService {
   constructor (private readonly collection: ICollection) {
@@ -11,13 +12,13 @@ export class AuditDataService implements IAuditDataService {
   public async insertAuditRecord (auditRecord: IAuditRecord): Promise<string> {
     const dbAuditRecord: IDBAuditRecord = {
       ...auditRecord,
-      _id: auditRecord.id!,
+      _id: ObjectId.createFromBase64(auditRecord.id!),
       _shardKey: auditRecord.id!
     };
 
     const result = await this.collection.insertOne(dbAuditRecord);
-    if (result.insertedCount > 0) {
-      return dbAuditRecord._id;
+    if (result.insertedId == dbAuditRecord._id) {
+      return dbAuditRecord._id.toString("base64");
     }
     else {
       throw new InsertFailedError();
@@ -26,7 +27,7 @@ export class AuditDataService implements IAuditDataService {
 }
 
 interface IDBAuditRecord extends IAuditRecord {
-  _id: string;
+  _id: ObjectId;
   _shardKey: string;
 }
 

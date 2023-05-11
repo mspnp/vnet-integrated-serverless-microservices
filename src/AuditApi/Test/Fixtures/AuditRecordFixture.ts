@@ -1,7 +1,7 @@
 import { IAuditRecord } from "../../Models/IAuditRecord";
 
 export class AuditRecordFixture {
-  public static readonly CreateAuditRecordId = "df5ad95e-05e9-4a22-aac0-f74164c623ac";
+  public static readonly CreateAuditRecordId = "df5ad95e05e94a22";
 
   public static createAuditRecordForCreatingInDb(): IAuditRecord {
     return {

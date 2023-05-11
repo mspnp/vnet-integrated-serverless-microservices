@@ -1,6 +1,6 @@
 import { anything, capture, mock, verify, instance } from "ts-mockito";
 import { AuditController } from "../../Controllers/AuditController";
-import { HttpRequest } from "@azure/functions";
+import { HttpRequest, Form } from "@azure/functions";
 import { IAuditDataService } from "../../Services/IAuditDataService";
 import { expect } from "chai";
 import { BadRequestResponse } from "../../Models/BadRequestResponse";
@@ -8,15 +8,20 @@ import { v4 as uuidv4 } from "uuid";
 import { AuditRecordFixture } from "../Fixtures/AuditRecordFixture";
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createAuditRequest (body: any = AuditRecordFixture.createAuditRecordForCreatingInDb()): HttpRequest {
+  
   return {
     body,
     headers: {},
     method: "POST",
     url: "",
     query: {},
-    params: {}
+    params: {},
+    get: function(field) {return field; },
+    user: null,
+    parseFormBody() {
+      return mock<Form>();
+    },
   };
 }
 

@@ -25,7 +25,7 @@ Start the emulator using `C:\Program Files\Azure Cosmos DB Emulator\Microsoft.Az
 
 ### Host your own MongoDB
 
-Instructions for hosting your own mongodb isntance can be found [here](https://docs.mongodb.com/manual/installation/)
+Instructions for hosting your own mongodb instance can be found [here](https://docs.mongodb.com/manual/installation/)
 
 Now update the `mongo_connection_string` setting in your `local.settings.json` file with the connection string for your chosen mongodb host.
 
@@ -34,13 +34,13 @@ Connect to your mongodb instance using the Azure portal, or a client application
 ## Running the code
 
 Start by opening a terminal and running `npm install`.
-You can run the code by running `func host start` in teh terminal or by using VS Code:
+You can run the code by running `func host start` in the terminal or by using VS Code:
 
 ### VS Code
 
 The .vscode contains all the tasks you need to run and debug the code. You can press f5 to run the application and debug it, as described [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code?tabs=csharp#debugging-functions-locally)
 
-Try it out by doing an HTPP POST to `http://localhost:7072/api/auditrecord` with the following body:
+Try it out by doing an HTTP POST to `http://localhost:7072/api/auditrecord` with the following body:
 
 ```json
 {

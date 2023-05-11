@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "resolveJsonModule": true,
+    "lib": ["ES2022"],
     "module": "commonjs",
-    "target": "ES2019",
+    "target": "ES2022",
     "outDir": "dist",
     "rootDir": ".",
     "sourceMap": true,
