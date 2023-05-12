@@ -1,30 +1,28 @@
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
-// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/azure-functions-node-10
 {
-	"name": "Azure Functions & Node.js 12",
-	"dockerFile": "Dockerfile",
+	"name": "vnet-integrated-serverless-microservices-audit-api",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-18",
 	"appPort": 7071,
-
-	// Use 'settings' to set *default* container specific settings.json values on container create.
-	// You can edit these settings after create using File > Preferences > Settings > Remote.
-	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash"
+	"features": {
+		"ghcr.io/devcontainers/features/azure-cli:1": {
+			"version": "2.47.0"
+		},
+		"ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools": {
+			"version": "4"
+		},
+		"ghcr.io/devcontainers/features/terraform:1": {
+			"version": "1.4.5"
+		}
 	},
-
-	"postCreateCommand": "rm -rf ./node_modules",
-
-	// Uncomment the next line to have VS Code connect as an existing non-root user in the container.
-	// On Linux, by default, the container user's UID/GID will be updated to match your local user. See
-	// https://aka.ms/vscode-remote/containers/non-root for details on adding a non-root user if none exist.
-	// "remoteUser": "node",
-
-	// Add the IDs of extensions you want installed when the container is created in the array below.
-  "extensions": [
-		"ms-azuretools.vscode-azurefunctions",
-		"dbaeumer.vscode-eslint",
-    "quicktype.quicktype",
-    "hbenl.vscode-mocha-test-adapter",
-    "hbenl.vscode-test-explorer",
-    "davidanson.vscode-markdownlint"
-	]
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-azurefunctions",
+        "dbaeumer.vscode-eslint",
+        "quicktype.quicktype",
+        "hbenl.vscode-mocha-test-adapter",
+        "hbenl.vscode-test-explorer",
+        "davidanson.vscode-markdownlint"
+      ]
+    }
+  }
 }
