@@ -5,7 +5,7 @@ export class EnvironmentSettings implements ISettings {
   public get testCollection(): string { return "tests";}
   public get patientTestDatabase(): string { return process.env.patient_tests_database || ""; }
   public get mongoConnectionString(): string { return process.env.mongo_connection_string || "";}
-  public get allowSelfSignedMongoCert(): boolean { return JSON.parse(process.env.allow_self_signed_mongo_cert || "false");}
+  public get allowSelfSignedMongoCert(): boolean { return JSON.parse(process.env.allow_self_signed_mongo_cert || "false") as boolean;}
   public get auditAPIUrl(): URL | undefined { 
     try {
       return new URL(process.env.audit_api_url!);

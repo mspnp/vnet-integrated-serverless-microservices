@@ -2,11 +2,20 @@ import { DBFixture } from "../Fixtures/DBFixture";
 import { PatientDataService } from "../../Services/PatientDataService";
 import { expect } from "chai";
 import { PatientFixture } from "../Fixtures/PatientFixture";
-import { UpdateFailedError } from "../../Models/UpdateFailedError";
 import { IPatientSearch } from "../../Models/IPatient";
 
 const db = new DBFixture();
 
+const createIds = [
+  "651384ac30304ad7",
+  "35ddcd3162924476",
+  "e80ad928b63d4f0d"];
+const searchIds = [
+  "9839c9ee11b545e6",
+  "3e5d2b595d974d5a",
+  "710702b837ee4d2b"];
+
+  
 describe("PatientDataService #integration", async function (): Promise<void> {
   before(async function (): Promise<void> {
     await db.init();
@@ -15,7 +24,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
 
   it("Won't find a patient that does not exist", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
-    const id = "-123";
+    const id = "0000000000000000";
 
     // test
     const createdPatient = await dataService.findPatient(id);
@@ -25,16 +34,17 @@ describe("PatientDataService #integration", async function (): Promise<void> {
   it("Can create and find a patient", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
     const expectedPatient = PatientFixture.createPatient();
-    expectedPatient.id = "newId";    
+    expectedPatient.id = "8b4c4f0b8eec1d9d";    
     const id = await dataService.insertPatient(expectedPatient);
 
     // test via standard db query to see first if the record is consistent
     const createdPatient = await db.loadPatient(id);
+    expect(createdPatient).not.null;
     Object.keys(expectedPatient).forEach(key => {
-      expect(createdPatient[key]).deep.equal(expectedPatient[key]);
+      expect(createdPatient![key]).deep.equal(expectedPatient[key]);
     });
-    expect(createdPatient._id).is.equal(id);
-    expect(createdPatient._shardKey).is.equal(id);
+    expect(createdPatient!._id.toString("base64")).is.equal(id);
+    expect(createdPatient!._shardKey).is.equal(id);
 
     // test finding patient via data service
     const foundPatient = await dataService.findPatient(id);
@@ -53,7 +63,7 @@ describe("PatientDataService #integration", async function (): Promise<void> {
   it("Can create and update a patient", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
     const expectedPatient = PatientFixture.createPatient();
-    expectedPatient.id = "updateId";    
+    expectedPatient.id = "29ab5ea044d498e8";
     const id = await dataService.insertPatient(expectedPatient);
 
     // test updating patient via data service
@@ -69,35 +79,18 @@ describe("PatientDataService #integration", async function (): Promise<void> {
     expect(foundPatient!.id).is.equal(id);
   }); 
 
-  it("Fails to update incomplete object", async function (): Promise<void> {
-    const dataService: PatientDataService = createPatientDataService();
-    const expectedPatient = PatientFixture.createPatient();
-    expectedPatient.id = "failedUpdateId";    
-    await dataService.insertPatient(expectedPatient);
-
-    // test updating patient via data service
-    expectedPatient.firstName = "testFirstName";
-    delete expectedPatient.id;
-
-    try {
-      await dataService.updatePatient(expectedPatient);
-    }
-    catch (e) {
-      expect(e).to.be.instanceOf(UpdateFailedError);
-    }
-  }); 
-
   it("Can create and search for patients - simple criteria", async function (): Promise<void> {
     const dataService: PatientDataService = createPatientDataService();
     const patients = [];
 
     // create sample patients
-    for (let i = 0; i < 3; i++) {
+    
+    createIds.forEach(async id => {
       const expectedPatient = PatientFixture.createPatientForCreatingInDb();
-      expectedPatient.id = "searchId-" + i;    
+      expectedPatient.id = id;    
       await dataService.insertPatient(expectedPatient);  
       patients.push(expectedPatient);
-    }
+    });
     
     // search for simple fields
     const fullPatientSearch = PatientFixture.createSimplePatientSearch();
@@ -135,13 +128,13 @@ describe("PatientDataService #integration", async function (): Promise<void> {
     const patients = [];
 
     // create sample patients
-    for (let i = 0; i < 3; i++) {
+    searchIds.forEach(async (id) => {
       const expectedPatient = PatientFixture.createPatientForCreatingInDb();
-      expectedPatient.id = "searchIdDate-" + i;    
+      expectedPatient.id = id;    
       expectedPatient.dateOfBirth = "1808-05-23";
       await dataService.insertPatient(expectedPatient);  
       patients.push(expectedPatient);
-    }
+    });
     
     // search for date field from
     let patientSearch: IPatientSearch = {

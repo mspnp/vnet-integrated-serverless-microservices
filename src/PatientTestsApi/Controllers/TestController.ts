@@ -33,11 +33,11 @@ export class TestController {
     }
    
     const test = req.body as ITest || {};
-    const newTestId = uuidv4();
+    const newTestId = uuidv4().replaceAll("-", "").substring(0, 16);
     try {
       await this.auditService.LogAuditRecord(this.createAuditResource(newTestId, "create"));
     } catch (error) {
-      return new AuditingErrorResponse(error);
+      return new AuditingErrorResponse(error as Error);
     }
     test.id = newTestId;
     test.lastUpdated = new Date();
@@ -58,7 +58,7 @@ export class TestController {
     try {
       await this.auditService.LogAuditRecord(this.createAuditResource(JSON.stringify(tests.map(test => test.id)), "read"));
     } catch (error) {
-      return new AuditingErrorResponse(error);
+      return new AuditingErrorResponse(error as Error);
     }
 
     return new ApiResponse(tests?.length == 1 ? tests[0] : tests);

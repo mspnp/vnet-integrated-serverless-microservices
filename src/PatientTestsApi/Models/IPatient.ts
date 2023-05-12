@@ -1,5 +1,5 @@
 import { Gender } from "./Gender";
-import Joi from "@hapi/joi";
+import Joi from "joi";
 
 export interface IPatient {
   [key: string]: unknown;
@@ -8,7 +8,7 @@ export interface IPatient {
   lastName: string;
   fullName?: string;
   gender: Gender;
-  dateOfBirth: string;
+  dateOfBirth?: string;
   postCode: string;
   insuranceNumber?: string;
   preferredContactNumber?: string;
@@ -36,7 +36,7 @@ const postcodeLength = 4;
 const dateRegexString = /^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?$/;
 
 export const PatientSchema = Joi.object<IPatient>({
-  id: Joi.string().guid().optional(),
+  id: Joi.string().optional(),
   firstName: Joi.string().max(maxLengthNameField).required(),
   lastName: Joi.string().max(maxLengthNameField),
   fullName: Joi.string().max(maxLengthFullNameField),
@@ -54,7 +54,7 @@ export const PatientSchema = Joi.object<IPatient>({
 });
 
 export const PatientSearchSchema = Joi.object<IPatientSearch>({
-  id: Joi.string().guid(),
+  id: Joi.string(),
   firstName: Joi.string().max(maxLengthNameField),
   lastName: Joi.string().max(maxLengthNameField),
   fullName: Joi.string().max(maxLengthFullNameField),

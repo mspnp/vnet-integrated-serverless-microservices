@@ -1,13 +1,17 @@
-import { Db, MongoClient } from "mongodb";
+import { Db, Document, MongoClient, ObjectId, WithId } from "mongodb";
 import { ISettings } from "../../Models/ISettings";
 import { ICollection, patchMongoCollection } from "../../Services/ICollection";
 import { FileSettings } from "./FileSettings";
+import { v4 as uuidv4 } from "uuid";
 
 export class DBFixture {
   public mongoDb: Db;
   public mongoClient: MongoClient;
   public settings: ISettings;
-
+  
+  public static createId(): string {
+    return uuidv4().replaceAll("-", "").substring(0, 16);
+  }
   constructor(){
     this.mongoDb = {} as Db;
     this.mongoClient = {} as MongoClient; 
@@ -18,7 +22,9 @@ export class DBFixture {
 
     // connect and select database
     this.mongoClient = await MongoClient.connect(this.settings.mongoConnectionString,
-      { useUnifiedTopology: true, useNewUrlParser: true, tlsAllowInvalidCertificates: true });
+      {
+        tlsAllowInvalidCertificates: this.settings.allowSelfSignedMongoCert
+      });
     
     this.mongoDb = this.mongoClient.db(this.settings.patientTestDatabase);
   }
@@ -32,8 +38,8 @@ export class DBFixture {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async loadPatient(id: string): Promise<any> {
-    return await this.mongoDb.collection(this.settings.patientCollection).findOne({_id: id});
+  public async loadPatient(id: string): Promise<WithId<Document> | null> {
+    return await this.mongoDb.collection(this.settings.patientCollection).findOne({_id: ObjectId.createFromBase64(id)});
   }
   
   public createTestCollection(): ICollection {
@@ -49,9 +55,9 @@ export class DBFixture {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async loadTest(id: string): Promise<any> {
+  public async loadTest(id: string): Promise<WithId<Document> | null> {
     // todo: check if we need to specify a shard key if we're finding by _id.
-    return await this.mongoDb.collection(this.settings.testCollection).findOne({_id: id});
+    return await this.mongoDb.collection(this.settings.testCollection).findOne({_id: ObjectId.createFromBase64(id)});
   }
   
 

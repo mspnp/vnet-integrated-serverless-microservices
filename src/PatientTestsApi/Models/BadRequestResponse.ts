@@ -8,7 +8,7 @@ export class BadRequestResponse extends Error implements IResponse {
   }
   body: string;
   headers = { "Content-Type": "application/json" };
-  status = HttpStatus.BAD_REQUEST;
+  status = HttpStatus.StatusCodes.BAD_REQUEST;
 }
 
 

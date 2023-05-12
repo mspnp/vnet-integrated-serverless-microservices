@@ -32,11 +32,11 @@ export class PatientController {
     }
    
     const patient = req.body as IPatient || {};
-    const newPatientId = uuidv4();
+    const newPatientId = uuidv4().replaceAll("-", "").substring(0, 16);
     try {
       await this.auditService.LogAuditRecord(this.createAuditResource(newPatientId, "create"));
     } catch (error) {
-      return new AuditingErrorResponse(error);
+      return new AuditingErrorResponse(error as Error);
     }
     patient.id = newPatientId;
     patient.lastUpdated = new Date();
@@ -56,7 +56,7 @@ export class PatientController {
     try {
       await this.auditService.LogAuditRecord(this.createAuditResource(patientId, "find"));
     } catch (error) {
-      return new AuditingErrorResponse(error);
+      return new AuditingErrorResponse(error as Error);
     }
     
     const patient: IPatient | null = await this.patientDataService.findPatient(patientId);
@@ -92,7 +92,7 @@ export class PatientController {
     try {
       await this.auditService.LogAuditRecord(this.createAuditResource(patient.id!, "update"));
     } catch (error) {
-      return new AuditingErrorResponse(error);
+      return new AuditingErrorResponse(error as Error);
     }
 
     // update patient
@@ -118,7 +118,7 @@ export class PatientController {
       const resource = JSON.stringify(req.body);
       await this.auditService.LogAuditRecord(this.createAuditResource(resource, "search"));
     } catch (error) {
-      return new AuditingErrorResponse(error);
+      return new AuditingErrorResponse(error as Error);
     }
     
     const patients: IPatient[] = await this.patientDataService.searchPatient(patientSearch);

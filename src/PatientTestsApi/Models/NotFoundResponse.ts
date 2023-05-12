@@ -8,6 +8,6 @@ export class NotFoundResponse extends Error implements IResponse {
   }
   body: string;
   headers = { "Content-Type": "application/json" };
-  status = HttpStatus.NOT_FOUND;
+  status = HttpStatus.StatusCodes.NOT_FOUND;
 }
 

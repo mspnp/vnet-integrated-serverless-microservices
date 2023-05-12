@@ -117,15 +117,15 @@ export class HttpDataService {
       
       throw new DownstreamError(errorMessage, {
         body: e.response && e.response.data || {},
-        status: e.response ? e.response.status : HttpStatus.INTERNAL_SERVER_ERROR,
-        headers: e.response?.headers
+        status: e.response ? e.response.status : HttpStatus.StatusCodes.INTERNAL_SERVER_ERROR,
+        headers: e.response?.headers ?? {}
       });
     }
   }
 
   // tslint:disable-next-line: completed-docs
   private createDependencyTelemetry(
-    timer: Timer, resultCode: string | number, success: boolean, url: URL, method?: string): IDependencyTelemetry {
+    timer: Timer, resultCode: string | number, success: boolean, url: URL, method = ""): IDependencyTelemetry {
     return {
       data: `${method} ${url.toString()}`,
       dependencyTypeName: "HTTP",

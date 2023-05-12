@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ICollection } from "./ICollection";
-import { CollectionInsertOneOptions, 
-         FilterQuery, 
-         FindOneOptions, 
-         InsertOneWriteOpResult,
-         UpdateOneOptions,
-         UpdateQuery,
-         UpdateWriteOpResult } from "mongodb";
+import { InsertOneOptions, 
+         InsertOneResult,
+         Filter, 
+         FindOptions, 
+         UpdateFilter,
+         UpdateOptions, 
+         UpdateResult } from "mongodb";
 import { Timer } from "./app-insights/timer";
 import { IDependencyTelemetry, IAppInsightsService } from "./app-insights/app-insights-service";
 
@@ -20,26 +20,26 @@ export class LoggingCollection implements ICollection {
   
   insertOne(
     docs: any,
-    options?: CollectionInsertOneOptions | undefined
-  ): Promise<InsertOneWriteOpResult<any>> {
+    options?: InsertOneOptions | undefined
+  ): Promise<InsertOneResult<any>> {
     const mongoRequest = JSON.stringify({insertOne: {options}});
     return this.trackDependency(() => this.collection.insertOne(docs, options), mongoRequest);
   }
 
-  public async findOne(filter: FilterQuery<any>, options?: FindOneOptions): Promise<any> {
+  public async findOne(filter: Filter<any>, options?: FindOptions): Promise<any> {
     const mongoRequest = JSON.stringify({findOne: {filter}});
     return this.trackDependency(() => this.collection.findOne(filter, options), mongoRequest);
   }
 
-  public async findMany(query: FilterQuery<any>, options?: FindOneOptions | undefined): Promise<any[]> {
+  public async findMany(query: Filter<any>, options?: FindOptions | undefined): Promise<any[]> {
     const mongoRequest = JSON.stringify({findMany: {query}});
     return this.trackDependency(() => this.collection.findMany(query, options), mongoRequest);
   }
 
   public async updateOne(
-    filter: FilterQuery<any>, 
-    update: UpdateQuery<any> | Partial<any>, options?: UpdateOneOptions
-  ): Promise<UpdateWriteOpResult> {
+    filter: Filter<any>, 
+    update: UpdateFilter<any> | Partial<any>, options?: UpdateOptions
+  ): Promise<UpdateResult> {
     const mongoRequest = JSON.stringify({updateOne: {filter}});
     return this.trackDependency(() => this.collection.updateOne(filter, update, options), mongoRequest);
   }

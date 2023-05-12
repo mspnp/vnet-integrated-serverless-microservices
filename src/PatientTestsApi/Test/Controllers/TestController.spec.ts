@@ -2,17 +2,17 @@ import { mock, instance, anything, verify, capture, when } from "ts-mockito";
 import { ITestDataService } from "../../Services/ITestDataService";
 import { IAuditService } from "../../Services/IAuditService";
 import { TestFixture } from "../Fixtures/TestFixture";
-import { HttpRequest } from "@azure/functions";
+import { Form, HttpRequest } from "@azure/functions";
 import { expect } from "chai";
 import { TestController } from "../../Controllers/TestController";
 import * as HttpStatus from "http-status-codes";
-import { v4 as uuidv4 } from "uuid";
 import { BadRequestResponse } from "../../Models/BadRequestResponse";
 import { DownstreamError } from "../../Models/DownstreamError";
 import { ITest } from "../../Models/ITest";
 import { AuditingErrorResponse } from "../../Models/AuditingErrorResponse";
 import { ApiResponse } from "../../Models/ApiResponse";
 import { NotFoundResponse } from "../../Models/NotFoundResponse";
+import { DBFixture } from "../Fixtures/DBFixture";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createTestRequest(body: any = TestFixture.createTestForCreatingInDb()): HttpRequest {
@@ -22,7 +22,12 @@ function createTestRequest(body: any = TestFixture.createTestForCreatingInDb()):
     method: "POST",
     url: "",
     query: {},
-    params: { patientId: body.patientId }
+    params: { patientId: body.patientId },
+    get: function(field) {return field; },
+    user: null,
+    parseFormBody() {
+      return mock<Form>();
+    }
   };
   delete request.body.patientId;
   return request;
@@ -35,7 +40,12 @@ function createGetRequest(params = {}): HttpRequest {
     method: "GET",
     url: "",
     query: {},
-    params
+    params,
+    get: function(field) {return field; },
+    user: null,
+    parseFormBody() {
+      return mock<Form>();
+    }
   };
   return request;
 }
@@ -51,6 +61,10 @@ function createController(dataService?: ITestDataService, auditService?: IAuditS
   return new TestController(dataService, auditService);
 }
 
+function createId(): string {
+  return DBFixture.createId();
+}
+
 describe("TestController", async function (): Promise<void> {
   it("Parses the test and creates it using the dataservice.", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
@@ -63,14 +77,14 @@ describe("TestController", async function (): Promise<void> {
     const [argument] = capture(dataServiceMock.insertTest).first();
     expect(argument.id).is.not.null;
     expect(response.body).is.not.null;
-    expect(response.status).is.equal(HttpStatus.CREATED);
+    expect(response.status).is.equal(HttpStatus.StatusCodes.CREATED);
   });
 
   it("Returns Bad request if test request has an id set.", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
     const controller = createController(instance(dataServiceMock));
     const request = createTestRequest();
-    request.body.id = uuidv4();
+    request.body.id = createId();
     
     const response = await controller.createTest(request);
 
@@ -118,7 +132,7 @@ describe("TestController", async function (): Promise<void> {
 
   it ("Does not create a test if the audit request fails.", async function(): Promise<void> {
     const auditServiceMock = mock<IAuditService>();
-    const expectedError = new DownstreamError("expectedEror", {body: {}, headers: {},status: HttpStatus.NOT_FOUND });
+    const expectedError = new DownstreamError("expectedEror", {body: {}, headers: {},status: HttpStatus.StatusCodes.NOT_FOUND });
     when(auditServiceMock.LogAuditRecord).thenThrow(expectedError);
     const testDataServiceMock = mock<ITestDataService>();
     const controller = createController(instance(testDataServiceMock), instance(auditServiceMock));
@@ -143,8 +157,8 @@ describe("TestController", async function (): Promise<void> {
 
   it ("Returns all tests for a given patient if no test id is specified.", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
-    const patientId = uuidv4();
-    const expectedTests = TestFixture.createTests([uuidv4(), uuidv4()]);
+    const patientId = createId();
+    const expectedTests = TestFixture.createTests([createId(), createId()]);
     when(dataServiceMock.findTests(patientId, undefined)).thenResolve(expectedTests);
     const controller = createController(instance(dataServiceMock));
     const request = createGetRequest({patientId});
@@ -157,8 +171,8 @@ describe("TestController", async function (): Promise<void> {
 
   it ("Returns the requested test if patient id and test id is specified.", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
-    const patientId = uuidv4();
-    const testId = uuidv4();
+    const patientId = createId();
+    const testId = createId();
     const expectedTests = [TestFixture.createTest()];
     when(dataServiceMock.findTests(patientId, testId)).thenResolve(expectedTests);
     const controller = createController(instance(dataServiceMock));
@@ -172,8 +186,8 @@ describe("TestController", async function (): Promise<void> {
 
   it ("Returns not found if patient id and test id is specified but no tests exist.", async function (): Promise<void> {
     const dataServiceMock = mock<ITestDataService>();
-    const patientId = uuidv4();
-    const testId = uuidv4();
+    const patientId = createId();
+    const testId = createId();
     when(dataServiceMock.findTests(patientId, testId)).thenResolve(null);
     const controller = createController(instance(dataServiceMock));
     const request = createGetRequest({patientId, testId});
@@ -185,8 +199,8 @@ describe("TestController", async function (): Promise<void> {
   
   it ("Creates an audit record when a single testsis loaded.", async function (): Promise<void> {
     const auditServiceMock = mock<IAuditService>();
-    const patientId = uuidv4();
-    const testId = uuidv4();
+    const patientId = createId();
+    const testId = createId();
     const request = createGetRequest({patientId, testId});
     const dataServiceMock = mock<ITestDataService>();
     when(dataServiceMock.findTests(patientId, testId)).thenResolve(TestFixture.createTests([testId]));
@@ -204,8 +218,8 @@ describe("TestController", async function (): Promise<void> {
   
   it ("Creates an audit record when all tests for a patient is loaded.", async function (): Promise<void> {
     const auditServiceMock = mock<IAuditService>();
-    const expectedTests = TestFixture.createTests([uuidv4(), uuidv4()]);
-    const patientId = uuidv4();
+    const expectedTests = TestFixture.createTests([createId(), createId()]);
+    const patientId = createId();
     const dataServiceMock = mock<ITestDataService>();
     when(dataServiceMock.findTests(patientId, undefined)).thenResolve(expectedTests);
 
@@ -219,6 +233,6 @@ describe("TestController", async function (): Promise<void> {
 
     expect(auditRecord.operation).is.equal("read");
     expect(auditRecord.type).is.equal("test");
-    expect(auditRecord.id).is.deep.equal(`["${expectedTests[0].id}","${expectedTests[1].id}"]`);
+    expect(auditRecord.id).is.deep.equal(`["${expectedTests[0].id!}","${expectedTests[1].id!}"]`);
   });  
 });

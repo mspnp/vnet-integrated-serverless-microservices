@@ -1,7 +1,7 @@
 import { RetryCollection } from "../../Services/RetryCollection";
 import { ICollection } from "../../Services/ICollection";
 import { mock, anything, when, instance, verify } from "ts-mockito";
-import { MongoError, InsertOneWriteOpResult } from "mongodb";
+import { MongoError, InsertOneResult, ObjectId } from "mongodb";
 import { expect } from "chai";
 
 describe("RetryCollection", async function (): Promise<void> {
@@ -11,8 +11,8 @@ describe("RetryCollection", async function (): Promise<void> {
     const expectedResult = createOneInsertResult();
     const expectedDoc = {key:"value"};
     when(mockCollection.insertOne(expectedDoc, anything()))
-    .thenThrow(new MongoError({code: 16500}))
-    .thenThrow(new MongoError({code: 16500}))
+    .thenThrow(new MongoError("16500"))
+    .thenThrow(new MongoError("16500"))
     .thenResolve(expectedResult);
     const collection = new RetryCollection(instance(mockCollection));
     
@@ -24,15 +24,11 @@ describe("RetryCollection", async function (): Promise<void> {
     verify(mockCollection.insertOne(expectedDoc, anything())).thrice();
     expect(elapsedTime).is.greaterThan(1999);
   });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function createOneInsertResult(): InsertOneWriteOpResult<any> {
+  
+  function createOneInsertResult(): InsertOneResult<any> {
     return {
-      insertedCount: 1,
-      ops: [],
-      insertedId: {},
-      connection: {},
-      result: { ok: 1, n: 1 }
+      insertedId: new ObjectId(),
+      acknowledged: true
     };
   }
 });

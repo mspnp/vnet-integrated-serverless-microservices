@@ -1,7 +1,7 @@
 export interface IResponse {
     body: unknown;
     headers: {
-        [key: string]: string;
+        [key: string]: any;
     };
     status: number;
 }

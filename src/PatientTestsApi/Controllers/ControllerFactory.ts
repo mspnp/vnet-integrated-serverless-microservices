@@ -57,7 +57,9 @@ export class ControllerFactory {
   private async createMongoDb(): Promise<Db> {
     // connect and select database
     const mongoClient = await MongoClient.connect(this.settings.mongoConnectionString,
-      { useUnifiedTopology: true, useNewUrlParser: true, tlsAllowInvalidCertificates: this.settings.allowSelfSignedMongoCert });
+      {
+        tlsAllowInvalidCertificates: this.settings.allowSelfSignedMongoCert
+      });
     
     return mongoClient.db(this.settings.patientTestDatabase);
   }

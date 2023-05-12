@@ -1,6 +1,5 @@
 import { DBFixture } from "../Fixtures/DBFixture";
 import { expect } from "chai";
-import { v4 as uuidv4 } from "uuid";
 import { TestDataService } from "../../Services/TestDataService";
 import { TestFixture } from "../Fixtures/TestFixture";
 
@@ -15,13 +14,14 @@ describe("TestDataService #integration", async function (): Promise<void> {
   it("Can create and find a specific test", async function (): Promise<void> {
     const dataService: TestDataService = createTestDataService();
     const expectedTest = TestFixture.createTest();
-    expectedTest.id = uuidv4();    
+    expectedTest.id = DBFixture.createId();
     const id = await dataService.insertTest(expectedTest);
 
     // test via standard db query to see first if the record is consistent
     const rawTest = await db.loadTest(id);
-    expect(rawTest._id).is.equal(id);
-    expect(rawTest._shardKey).is.equal(expectedTest.patientId);
+    expect(rawTest).not.null;
+    expect(rawTest!._id.toString("base64")).is.equal(id);
+    expect(rawTest!._shardKey).is.equal(expectedTest.patientId);
 
     //now test the find specific test
     const actualTests = await dataService.findTests(expectedTest.patientId, id);
@@ -39,7 +39,7 @@ describe("TestDataService #integration", async function (): Promise<void> {
   
   it("Can create and find all tests for a patient", async function (): Promise<void> {
     const dataService: TestDataService = createTestDataService();
-    const expectedIds = [uuidv4(), uuidv4()];
+    const expectedIds = [DBFixture.createId(), DBFixture.createId()];
     const expectedTests = TestFixture.createTests(expectedIds);
     await dataService.insertTest(expectedTests[0]);
     await dataService.insertTest(expectedTests[1]);

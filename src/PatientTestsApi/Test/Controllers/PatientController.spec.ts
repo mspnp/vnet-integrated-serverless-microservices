@@ -1,10 +1,9 @@
 import { anything, capture, mock, verify, instance, when } from "ts-mockito";
 import { PatientController } from "../../Controllers/PatientController";
-import { HttpRequest } from "@azure/functions";
+import { Form, HttpRequest } from "@azure/functions";
 import { IPatientDataService } from "../../Services/IPatientDataService";
 import { expect } from "chai";
 import { BadRequestResponse } from "../../Models/BadRequestResponse";
-import { v4 as uuidv4 } from "uuid";
 import { PatientFixture } from "../Fixtures/PatientFixture";
 import { IAuditService } from "../../Services/IAuditService";
 import { IPatient, IPatientSearch } from "../../Models/IPatient";
@@ -14,8 +13,8 @@ import { AuditingErrorResponse } from "../../Models/AuditingErrorResponse";
 import { NotFoundResponse } from "../../Models/NotFoundResponse";
 import { UpdateFailedError } from "../../Models/UpdateFailedError";
 import { isObjectEmpty } from "../../Util/Utils";
+import { DBFixture } from "../Fixtures/DBFixture";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPatientRequest(body: any = PatientFixture.createPatientForCreatingInDb()): HttpRequest {
   return {
     body,
@@ -23,7 +22,12 @@ function createPatientRequest(body: any = PatientFixture.createPatientForCreatin
     method: "POST",
     url: "",
     query: {},
-    params: {}
+    params: {},
+    get: function(field) {return field; },
+    user: null,
+    parseFormBody() {
+      return mock<Form>();
+    }
   };
 }
 
@@ -33,7 +37,12 @@ function createEmptyRequest(): HttpRequest {
     url: "",
     headers: {},
     query: {},
-    params: {}
+    params: {},
+    get: function(field) {return field; },
+    user: null,
+    parseFormBody() {
+      return mock<Form>();
+    }
   };
 }
 
@@ -59,14 +68,14 @@ describe("PatientController", async function (): Promise<void> {
     const [argument] = capture(dataServiceMock.insertPatient).first();
     expect(argument.id).is.not.null;
     expect(response.body).is.not.null;
-    expect(response.status).is.equal(HttpStatus.CREATED);
+    expect(response.status).is.equal(HttpStatus.StatusCodes.CREATED);
   });
 
   it("Returns Bad request if patient request has an id set.", async function (): Promise<void> {
     const dataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(dataServiceMock));
     const request = createPatientRequest();
-    request.body.id = uuidv4();
+    request.body.id = DBFixture.createId();
     
     const response = await controller.createPatient(request);
 
@@ -114,7 +123,7 @@ describe("PatientController", async function (): Promise<void> {
 
   it ("Does not create a patient if the audit request fails.", async function(): Promise<void> {
     const auditServiceMock = mock<IAuditService>();
-    const expectedError = new DownstreamError("expectedEror", {body: {}, headers: {},status: HttpStatus.NOT_FOUND });
+    const expectedError = new DownstreamError("expectedEror", {body: {}, headers: {},status: HttpStatus.StatusCodes.NOT_FOUND });
     when(auditServiceMock.LogAuditRecord).thenThrow(expectedError);
     const patientDataServiceMock = mock<IPatientDataService>();
     const controller = createController(instance(patientDataServiceMock), instance(auditServiceMock));
@@ -167,7 +176,7 @@ describe("PatientController", async function (): Promise<void> {
     
     const result = await controller.findPatient(request);
     const patientResult = result.body as IPatient;
-    expect(result.status).to.equal(HttpStatus.OK);
+    expect(result.status).to.equal(HttpStatus.StatusCodes.OK);
     expect(patientResult.id).to.equal(PatientFixture.CreatePatientId);
   });
 
@@ -204,7 +213,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createPatientRequest();
 
     // configure request
-    request.body.id = uuidv4();
+    request.body.id = DBFixture.createId();
     request.params["patientId"] = request.body.id;
 
     // configure mock
@@ -225,7 +234,7 @@ describe("PatientController", async function (): Promise<void> {
     const request = createPatientRequest();
 
     // configure request
-    request.body.id = uuidv4();
+    request.body.id = DBFixture.createId();
     request.params["patientId"] = request.body.id;
 
     // configure mock
@@ -304,7 +313,7 @@ describe("PatientController", async function (): Promise<void> {
     expect(isObjectEmpty(argument)).to.be.true;
 
     const patientResults = result.body as IPatient[];
-    expect(result.status).to.equal(HttpStatus.OK);
+    expect(result.status).to.equal(HttpStatus.StatusCodes.OK);
     expect(patientResults.length).to.equal(patients.length);
   });
 });

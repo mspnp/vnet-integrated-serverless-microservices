@@ -33,8 +33,12 @@
         "@typescript-eslint/no-unused-vars": [
             "error"
           ],
-        "@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" } ],
-        "@typescript-eslint/no-non-null-assertion": "off"
+          "@typescript-eslint/no-non-null-assertion": "off",
+          "@typescript-eslint/no-unsafe-member-access": "off",
+          "@typescript-eslint/no-unsafe-assignment": "off",
+          "@typescript-eslint/no-unsafe-return": "off",
+          "@typescript-eslint/no-unsafe-argument": "off",
+          "@typescript-eslint/no-explicit-any": "off"
     },
     "overrides": [
         {

@@ -2,6 +2,7 @@ import { ITest } from "../Models/ITest";
 import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
 import { ITestDataService } from "./ITestDataService";
+import { ObjectId } from "mongodb";
 
 export class TestDataService implements ITestDataService {
   constructor (private readonly collection: ICollection) {
@@ -10,13 +11,13 @@ export class TestDataService implements ITestDataService {
   public async insertTest(test: ITest): Promise<string> {
     const dbTest: IDBTest = {
       ...test,
-      _id: test.id!,
+      _id: ObjectId.createFromBase64(test.id!),
       _shardKey: test.patientId
     };
 
     const result = await this.collection.insertOne(dbTest);
-    if (result.insertedCount > 0) {
-      return dbTest._id;
+    if (result.insertedId == dbTest._id) {
+      return dbTest._id.toString("base64");
     }
     else {
       throw new InsertFailedError();
@@ -33,7 +34,7 @@ export class TestDataService implements ITestDataService {
         return [];
       }
     } else {
-      const result = await this.collection.findOne({_id: testId, _shardKey: patientId});
+      const result = await this.collection.findOne({_id: ObjectId.createFromBase64(testId), _shardKey: patientId});
       if (result != null)
         return [this.createTest(result)];
       else 
@@ -50,7 +51,7 @@ export class TestDataService implements ITestDataService {
 }
 
 interface IDBTest extends ITest {
-  _id: string;
-  _shardKey: string;
+  _id?: ObjectId;
+  _shardKey?: string;
 }
 

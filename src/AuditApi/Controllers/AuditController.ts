@@ -30,7 +30,6 @@ export class AuditController {
     //this is done to ensure that the newId will be less than the max length of the shard key
     //which is 16 characters
     const newId = uuidv4().replaceAll("-", "").substring(0, 16);
-    console.log("newId: " + newId);
     auditRecord.id = newId;
     auditRecord.createdDate = new Date();
 

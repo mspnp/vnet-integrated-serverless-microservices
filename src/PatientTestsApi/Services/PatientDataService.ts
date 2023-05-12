@@ -4,6 +4,7 @@ import { ICollection } from "./ICollection";
 import { InsertFailedError } from "../Models/InsertFailedError";
 import { UpdateFailedError } from "../Models/UpdateFailedError";
 import { addDateCriteria, createSimpleCriteriaOperatorList, removeUndefinedPropertiesFromObject } from "../Util/Utils";
+import { ObjectId } from "mongodb";
 
 export class PatientDataService implements IPatientDataService {
   constructor (private readonly collection: ICollection) {
@@ -13,14 +14,14 @@ export class PatientDataService implements IPatientDataService {
   public async insertPatient(patient: IPatient): Promise<string> {
     const dbPatient: IDBPatient = {
       ...patient,
-      _id: patient.id!,
+      _id: ObjectId.createFromBase64(patient.id!),
       _shardKey: patient.id!,
-      _dateOfBirthDate: new Date(patient.dateOfBirth)
+      _dateOfBirthDate: new Date(patient.dateOfBirth!)
     };
 
     const result = await this.collection.insertOne(dbPatient);
-    if (result.insertedCount > 0) {
-      return dbPatient._id;
+    if (result.insertedId == dbPatient._id!) {
+      return dbPatient._id.toString("base64");
     }
     else {
       throw new InsertFailedError();
@@ -42,9 +43,9 @@ export class PatientDataService implements IPatientDataService {
   public async updatePatient(patient: IPatient): Promise<string | null> {
     const dbPatient: IDBPatient = {
       ...patient,
-      _id: patient.id!,
+      _id: ObjectId.createFromBase64(patient.id!),
       _shardKey: patient.id!,
-      _dateOfBirthDate: new Date(patient.dateOfBirth)
+      _dateOfBirthDate: new Date(patient.dateOfBirth!)
     };
 
     const filter = { _id: dbPatient._id, _shardKey: dbPatient._shardKey };
@@ -103,9 +104,9 @@ export class PatientDataService implements IPatientDataService {
 }
 
 interface IDBPatient extends IPatient {
-  _id: string;
-  _shardKey: string;
-  _dateOfBirthDate: Date;  
+  _id?: ObjectId;
+  _shardKey?: string;
+  _dateOfBirthDate?: Date;  
 }
 
 

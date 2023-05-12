@@ -1,4 +1,4 @@
-import Joi from "@hapi/joi";
+import Joi from "joi";
 
 export interface ITest {
   [key: string]: unknown;
@@ -20,8 +20,8 @@ export interface IObservation {
 }
 
 export const TestSchema = Joi.object<ITest>({
-  id: Joi.string().guid().optional(),
-  patientId: Joi.string().guid().required(),
+  id: Joi.string().optional(),
+  patientId: Joi.string().required(),
   performer: Joi.string().required(),
   orderReference: Joi.string().required(),
   observations: Joi.array().items(

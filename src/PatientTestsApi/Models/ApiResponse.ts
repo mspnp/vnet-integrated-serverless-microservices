@@ -4,5 +4,5 @@ export class ApiResponse<T> implements IResponse {
   public constructor(public body: T) {
   }
   headers = { "Content-Type": "application/json" };
-  status = HttpStatus.OK;
+  status = HttpStatus.StatusCodes.OK;
 }

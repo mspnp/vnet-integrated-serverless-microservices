@@ -1,5 +1,5 @@
 {
-	"name": "vnet-integrated-serverless-microservices-env",
+	"name": "vnet-integrated-serverless-microservices-audit-api",
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-18",
   "appPort": 7072,
 	"features": {

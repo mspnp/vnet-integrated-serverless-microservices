@@ -8,5 +8,5 @@ export class AuditingErrorResponse extends Error implements IResponse {
   }
   body: string;
   headers = { "Content-Type": "application/json" };
-  status = HttpStatus.INTERNAL_SERVER_ERROR;
+  status = HttpStatus.StatusCodes.INTERNAL_SERVER_ERROR;
 }
