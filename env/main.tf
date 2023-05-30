@@ -1,14 +1,22 @@
+terraform {
+  backend "azurerm" {}
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "=3.58.0"
+    }
+    external = {
+      source = "hashicorp/external"
+      version = "~>2.3.1"
+    }
+  }
+}
+
 provider "azurerm" {
-  version = "~> 2.10"
   features {}
 }
 
 provider "external" {
-  version = "~> 1.2"
-}
-
-terraform {
-  backend "azurerm" {}
 }
 
 data "azurerm_client_config" "current" {}
@@ -37,8 +45,6 @@ resource "azurerm_cosmosdb_account" "cosmos" {
     failover_priority = 0
   }
 
-  # Default is MongoDB 3.2, use capabilities to enable MongoDB 3.6
-  # https://github.com/terraform-providers/terraform-provider-azurerm/issues/4757
   capabilities {
     name = "EnableMongo"
   }
@@ -109,33 +115,26 @@ resource "azurerm_storage_account" "sa" {
 }
 
 # Elastic Premium Plan
-resource "azurerm_app_service_plan" "asp_patient_api" {
+resource "azurerm_service_plan" "asp_patient_api" {
   name                = "${var.project_name}-asp-patient-api-${var.environment}"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
-  kind                = "elastic"
+  os_type             = "Linux"
 
   # https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#regional-virtual-network-integration
   # A /26 with 64 addresses accommodates a Premium plan with 30 instances.
   maximum_elastic_worker_count = 30
 
-  sku {
-    tier = "ElasticPremium"
-    size = "EP1"
-  }
+  sku_name = "EP1"
 }
 
 # Consumption Plan
-resource "azurerm_app_service_plan" "asp_audit_api" {
+resource "azurerm_service_plan" "asp_audit_api" {
   name                = "${var.project_name}-asp-audit-api-${var.environment}"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
-  kind                = "FunctionApp"
-
-  sku {
-    tier = "Dynamic"
-    size = "Y1"
-  }
+  os_type             = "Linux"
+  sku_name            = "Y1"
 }
 
 # Application Insights
@@ -161,16 +160,15 @@ resource "azurerm_subnet" "apim-snet" {
   resource_group_name  = data.azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.0.96/28"]
-
-  # TF doesn't support APIM as a delegation yet
-  #delegation {
-  #  name = "apimdelegation"
-  #
-  #  service_delegation {
-  #    name    = "Microsoft.ApiManagement/service"
-  #    actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-  #  }
-  #}
+  
+  delegation {
+   name = "apimdelegation"
+  
+   service_delegation {
+     name    = "Microsoft.ApiManagement/service"
+     actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+   }
+  }
 
   service_endpoints = ["Microsoft.Web"]
 }
@@ -201,7 +199,7 @@ module "fa_patient_api" {
   name                             = "${var.project_name}-fa-patient-api-${var.environment}"
   resource_group_name              = data.azurerm_resource_group.rg.name
   location                         = var.location
-  app_service_plan_id              = azurerm_app_service_plan.asp_patient_api.id
+  service_plan_id                  = azurerm_service_plan.asp_patient_api.id
   storage_account_name             = azurerm_storage_account.sa.name
   storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
   app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
@@ -211,7 +209,7 @@ module "fa_patient_api" {
     mongo_connection_string = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.cosmos_conn.id})"
     patient_tests_database  = "newcastle"
     audit_api_url           = "https://${module.fa_audit_api.default_hostname}/api/auditrecord"
-    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.fa_audit_api_host_key.id})"
+    audit_auth_key          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.fa_audit_api_host_key.id})"
   }
 
   key_vault_id = azurerm_key_vault.kv.id
@@ -239,7 +237,7 @@ module "fa_audit_api" {
   name                             = "${var.project_name}-fa-audit-api-${var.environment}"
   resource_group_name              = data.azurerm_resource_group.rg.name
   location                         = var.location
-  app_service_plan_id              = azurerm_app_service_plan.asp_audit_api.id
+  service_plan_id                  = azurerm_service_plan.asp_audit_api.id
   storage_account_name             = azurerm_storage_account.sa.name
   storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
   app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
@@ -269,26 +267,21 @@ resource "null_resource" "deploy_audit_api" {
   ]
 }
 
-# Function App Host Key
-# 2020-05-12 Currently azurerm provider does not export function app host keys
-# https://github.com/terraform-providers/terraform-provider-azurerm/issues/699
-# Patient API Host Key
-data "external" "fa_patient_api_host_key" {
-  program = ["bash", "-c", "sleep 10 && az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
-
+data azurerm_function_app_host_keys fa_patient_api_host_key {
+  name = module.fa_patient_api.name
+  resource_group_name = data.azurerm_resource_group.rg.name
   depends_on = [
     module.fa_patient_api,
     null_resource.deploy_patient_api
   ]
 }
 
-# Audit API Host Key
-data "external" "fa_audit_api_host_key" {
-  program = ["bash", "-c", "sleep 10 && az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_audit_api.name}/host/default/listKeys?api-version=2019-08-01 --query functionKeys"]
-
-  depends_on = [
+data azurerm_function_app_host_keys fa_audit_api_host_key {
+  name = module.fa_audit_api.name
+  resource_group_name = data.azurerm_resource_group.rg.name
+  depends_on = [ 
     module.fa_audit_api,
-    null_resource.deploy_audit_api
+    null_resource.deploy_audit_api 
   ]
 }
 
@@ -318,6 +311,7 @@ resource "azurerm_api_management" "apim" {
   }
 }
 
+## TODO: change to using apim subscription resource.
 # API Management Master Key
 data "external" "apim_master_key" {
   program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.ApiManagement/service/${azurerm_api_management.apim.name}/subscriptions/master/listSecrets?api-version=2019-12-01"]
@@ -381,20 +375,20 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
   <inbound>
     <base />
     <!-- Look for func-host-key in the cache -->
-    <cache-lookup-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
+    <cache-lookup-value key="func-host-key-${azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
     <!-- If API Management doesn’t find it in the cache, make a request for it and store it -->
     <choose>
       <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
         <!-- Make HTTP request to get function host key -->
         <send-request ignore-error="false" timeout="20" response-variable-name="coderesponse" mode="new">
-          <set-url>${data.azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
+          <set-url>${azurerm_key_vault_secret.fa_patient_api_host_key.id}?api-version=7.0</set-url>
           <set-method>GET</set-method>
           <authentication-managed-identity resource="https://vault.azure.net" />
         </send-request>
         <!-- Store response body in context variable -->
         <set-variable name="funchostkey" value="@((string)((IResponse)context.Variables["coderesponse"]).Body.As<JObject>()["value"])" />
         <!-- Store result in cache -->
-        <cache-store-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" value="@((string)context.Variables["funchostkey"])" duration="100000" />
+        <cache-store-value key="func-host-key-${azurerm_key_vault_secret.fa_patient_api_host_key.version}" value="@((string)context.Variables["funchostkey"])" duration="100000" />
       </when>
     </choose>
     <set-header name="x-functions-key" exists-action="override">
@@ -506,9 +500,9 @@ resource "azurerm_key_vault_access_policy" "sp" {
   object_id    = data.azurerm_client_config.current.object_id
 
   secret_permissions = [
-    "delete",
-    "get",
-    "set"
+    "Delete",
+    "Get",
+    "Set"
   ]
 }
 
@@ -535,30 +529,20 @@ resource "azurerm_key_vault_secret" "cosmos_conn" {
 
 resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
   name         = "fa-patient-api-host-key"
-  value        = data.external.fa_patient_api_host_key.result.default
+  value        = data.azurerm_function_app_host_keys.fa_patient_api_host_key.default_function_key
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
     azurerm_key_vault_access_policy.sp
   ]
-}
-
-data "azurerm_key_vault_secret" "fa_patient_api_host_key" {
-  name         = azurerm_key_vault_secret.fa_patient_api_host_key.name
-  key_vault_id = azurerm_key_vault_secret.fa_patient_api_host_key.key_vault_id
 }
 
 resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
   name         = "fa-audit-api-host-key"
-  value        = data.external.fa_audit_api_host_key.result.default
+  value        = data.azurerm_function_app_host_keys.fa_audit_api_host_key.default_function_key
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
     azurerm_key_vault_access_policy.sp
   ]
-}
-
-data "azurerm_key_vault_secret" "fa_audit_api_host_key" {
-  name         = azurerm_key_vault_secret.fa_audit_api_host_key.name
-  key_vault_id = azurerm_key_vault_secret.fa_audit_api_host_key.key_vault_id
 }

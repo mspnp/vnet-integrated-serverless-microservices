@@ -4,7 +4,7 @@ variable "resource_group_name" {}
 
 variable "location" {}
 
-variable "app_service_plan_id" {}
+variable "service_plan_id" {}
 
 variable "storage_account_name" {}
 
