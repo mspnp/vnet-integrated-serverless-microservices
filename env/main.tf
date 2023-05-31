@@ -83,6 +83,7 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
   index { keys = ["_dateOfBirthDate"] }
 }
 
+# Cosmos DB Mongo Collection for Tests
 resource "azurerm_cosmosdb_mongo_collection" "coll_test" {
   name                = "tests"
   resource_group_name = azurerm_cosmosdb_mongo_database.mongodb.resource_group_name
@@ -97,6 +98,7 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_test" {
   }
 }
 
+# Cosmos DB Mongo Collection for Audit
 resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   name                = "audits"
   resource_group_name = azurerm_cosmosdb_mongo_database.mongodb.resource_group_name
@@ -146,13 +148,22 @@ resource "azurerm_service_plan" "asp_audit_api" {
   sku_name            = "Y1"
 }
 
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "law" {
+  name                = "${var.project_name}-law-${var.environment}"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = var.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
 # Application Insights
 resource "azurerm_application_insights" "ai" {
   name                = "${var.project_name}-ai-${var.environment}"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
   application_type    = "Node.JS"
-  retention_in_days   = 90
+  workspace_id        = azurerm_log_analytics_workspace.law.id
 }
 
 # Virtual Network
@@ -163,7 +174,7 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
 }
 
-# Subnet (APIM)
+# Subnet for APIM
 resource "azurerm_subnet" "apim-snet" {
   name                 = "${var.project_name}-apim-snet-${var.environment}"
   resource_group_name  = data.azurerm_resource_group.rg.name
@@ -182,7 +193,7 @@ resource "azurerm_subnet" "apim-snet" {
   service_endpoints = ["Microsoft.Web"]
 }
 
-# Subnet (web app)
+# Subnet for Patient API
 resource "azurerm_subnet" "snet" {
   name                 = "${var.project_name}-snet-${var.environment}"
   resource_group_name  = data.azurerm_resource_group.rg.name
@@ -224,6 +235,7 @@ module "fa_patient_api" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
+# Deploy Patient API to Function App
 resource "null_resource" "deploy_patient_api" {
   triggers = {
     build_number = var.build_id
@@ -260,6 +272,7 @@ module "fa_audit_api" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
+# Deploy Audit API to Function App
 resource "null_resource" "deploy_audit_api" {
   triggers = {
     build_number = var.build_id
@@ -276,6 +289,7 @@ resource "null_resource" "deploy_audit_api" {
   ]
 }
 
+# Function App Host Keys for Patient API
 data azurerm_function_app_host_keys fa_patient_api_host_key {
   name = module.fa_patient_api.name
   resource_group_name = data.azurerm_resource_group.rg.name
@@ -285,6 +299,7 @@ data azurerm_function_app_host_keys fa_patient_api_host_key {
   ]
 }
 
+# Function App Host Keys for Audit API
 data azurerm_function_app_host_keys fa_audit_api_host_key {
   name = module.fa_audit_api.name
   resource_group_name = data.azurerm_resource_group.rg.name
@@ -294,7 +309,7 @@ data azurerm_function_app_host_keys fa_audit_api_host_key {
   ]
 }
 
-# Regional VNet Integration
+# Regional VNet Integration for Patient API
 resource "azurerm_app_service_virtual_network_swift_connection" "vnet_int" {
   app_service_id = module.fa_patient_api.id
   subnet_id      = azurerm_subnet.snet.id
@@ -320,6 +335,7 @@ resource "azurerm_api_management" "apim" {
   }
 }
 
+# API Management Subscription for Patient Api
 resource "azurerm_api_management_subscription" "patient_subscription" {
   api_management_name = azurerm_api_management.apim.name
   resource_group_name = azurerm_api_management.apim.resource_group_name
@@ -359,7 +375,7 @@ resource "azurerm_api_management_backend" "fa_patient_api" {
   resource_id         = "https://management.azure.com/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.Web/sites/${module.fa_patient_api.name}"
 }
 
-# API
+# Patient API
 resource "azurerm_api_management_api" "patient" {
   name                = "patient-api"
   resource_group_name = azurerm_api_management.apim.resource_group_name
@@ -371,7 +387,7 @@ resource "azurerm_api_management_api" "patient" {
   service_url         = "https://${module.fa_patient_api.default_hostname}/api/patient"
 }
 
-# API Policy
+# Patient API Base Policy
 resource "azurerm_api_management_api_policy" "patient_policy" {
   api_name            = azurerm_api_management_api.patient.name
   api_management_name = azurerm_api_management_api.patient.api_management_name
@@ -406,7 +422,7 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
 XML
 }
 
-# API Operations
+# Patient API Create Operation
 resource "azurerm_api_management_api_operation" "patient_create" {
   operation_id        = "patient-create"
   api_name            = azurerm_api_management_api.patient.name
@@ -417,6 +433,7 @@ resource "azurerm_api_management_api_operation" "patient_create" {
   url_template        = "/"
 }
 
+# Patient API Load Operation
 resource "azurerm_api_management_api_operation" "patient_load" {
   operation_id        = "patient-load"
   api_name            = azurerm_api_management_api.patient.name
@@ -433,6 +450,7 @@ resource "azurerm_api_management_api_operation" "patient_load" {
   }
 }
 
+# Patient API Update Operation
 resource "azurerm_api_management_api_operation" "patient_update" {
   operation_id        = "patient-update"
   api_name            = azurerm_api_management_api.patient.name
@@ -449,6 +467,7 @@ resource "azurerm_api_management_api_operation" "patient_update" {
   }
 }
 
+# Patient API Search Operation
 resource "azurerm_api_management_api_operation" "patient_search" {
   operation_id        = "patient-search"
   api_name            = azurerm_api_management_api.patient.name
@@ -459,6 +478,7 @@ resource "azurerm_api_management_api_operation" "patient_search" {
   url_template        = "/search"
 }
 
+# Patient API Test Create Operation
 resource "azurerm_api_management_api_operation" "test_create" {
   operation_id        = "test-create"
   api_name            = azurerm_api_management_api.patient.name
@@ -474,6 +494,7 @@ resource "azurerm_api_management_api_operation" "test_create" {
   }
 }
 
+# Patient API Test Load Operation
 resource "azurerm_api_management_api_operation" "tests_load" {
   operation_id        = "tests-load"
   api_name            = azurerm_api_management_api.patient.name
@@ -500,7 +521,7 @@ resource "azurerm_key_vault" "kv" {
   sku_name = "standard"
 }
 
-# Key Vault Access Policy
+# Key Vault Access Policy for deployment user
 resource "azurerm_key_vault_access_policy" "sp" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -513,6 +534,7 @@ resource "azurerm_key_vault_access_policy" "sp" {
   ]
 }
 
+# Key Vault Access Policy for API Management
 resource "azurerm_key_vault_access_policy" "apim" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = azurerm_api_management.apim.identity[0].tenant_id
@@ -523,7 +545,7 @@ resource "azurerm_key_vault_access_policy" "apim" {
   ]
 }
 
-# Key Vault Secret
+# Key Vault Secret for Cosmos DB Connection String
 resource "azurerm_key_vault_secret" "cosmos_conn" {
   name         = "cosmos-conn"
   value        = "${azurerm_cosmosdb_account.cosmos.connection_strings[0]}&retryWrites=false"
@@ -534,6 +556,7 @@ resource "azurerm_key_vault_secret" "cosmos_conn" {
   ]
 }
 
+# Key Vault Secret for Patient Function App Host Keys
 resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
   name         = "fa-patient-api-host-key"
   value        = data.azurerm_function_app_host_keys.fa_patient_api_host_key.default_function_key
@@ -544,6 +567,7 @@ resource "azurerm_key_vault_secret" "fa_patient_api_host_key" {
   ]
 }
 
+# Key Vault Secret for Audit Function App Host Keys
 resource "azurerm_key_vault_secret" "fa_audit_api_host_key" {
   name         = "fa-audit-api-host-key"
   value        = data.azurerm_function_app_host_keys.fa_audit_api_host_key.default_function_key
