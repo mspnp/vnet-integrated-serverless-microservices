@@ -21,7 +21,7 @@ resource "azurerm_linux_function_app" "fa" {
     ip_restriction {
       virtual_network_subnet_id = var.ip_restriction_subnet_id
     }
-    application_insights_key    = var.app_insights_instrumentation_key
+    application_insights_connection_string = var.app_insights_connection_string
     application_stack {
       node_version = "18"
     }

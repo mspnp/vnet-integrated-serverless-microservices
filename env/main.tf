@@ -222,7 +222,7 @@ module "fa_patient_api" {
   service_plan_id                  = azurerm_service_plan.asp_patient_api.id
   storage_account_name             = azurerm_storage_account.sa.name
   storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
-  app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
+  app_insights_connection_string   = azurerm_application_insights.ai.connection_string
   ip_restriction_subnet_id         = azurerm_subnet.apim-snet.id
 
   extra_app_settings = {
@@ -261,7 +261,7 @@ module "fa_audit_api" {
   service_plan_id                  = azurerm_service_plan.asp_audit_api.id
   storage_account_name             = azurerm_storage_account.sa.name
   storage_account_access_key       = azurerm_storage_account.sa.primary_access_key
-  app_insights_instrumentation_key = azurerm_application_insights.ai.instrumentation_key
+  app_insights_connection_string   = azurerm_application_insights.ai.connection_string
   ip_restriction_subnet_id         = azurerm_subnet.snet.id
 
   extra_app_settings = {
