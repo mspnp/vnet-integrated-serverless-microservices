@@ -67,7 +67,10 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_patient" {
   throughput          = 400
 
   index { keys = ["id"] }
-  index { keys = ["_id"] }
+  index { 
+    keys = ["_id"]
+    unique = true 
+  }
   index { keys = ["firstName"] }
   index { keys = ["lastName"] }
   index { keys = ["fullName"] }
@@ -88,7 +91,10 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_test" {
   shard_key           = "_shardKey"
   throughput          = 400
 
-  index { keys = ["_id"] }
+  index { 
+    keys = ["_id"]
+    unique = true 
+  }
 }
 
 resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
@@ -99,7 +105,10 @@ resource "azurerm_cosmosdb_mongo_collection" "coll_audit" {
   shard_key           = "_shardKey"
   throughput          = 400
 
-  index { keys = ["_id"] }
+  index { 
+    keys = ["_id"]
+    unique = true 
+  }
 }
 
 # Storage Account
@@ -311,14 +320,12 @@ resource "azurerm_api_management" "apim" {
   }
 }
 
-## TODO: change to using apim subscription resource.
-# API Management Master Key
-data "external" "apim_master_key" {
-  program = ["bash", "-c", "az rest --method post --uri /subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.project_name}/providers/Microsoft.ApiManagement/service/${azurerm_api_management.apim.name}/subscriptions/master/listSecrets?api-version=2019-12-01"]
-
-  depends_on = [
-    azurerm_api_management.apim
-  ]
+resource "azurerm_api_management_subscription" "patient_subscription" {
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = azurerm_api_management.apim.resource_group_name
+  api_id              = azurerm_api_management_api.patient.id
+  display_name        = "patient_subscription"
+  state               = "active"
 }
 
 # API Management Logger

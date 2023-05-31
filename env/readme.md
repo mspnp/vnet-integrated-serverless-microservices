@@ -119,15 +119,15 @@ The build_id variable is used to determine whether to deploy the function apps' 
 After applying the terraform configuration successfully, you will see two outputs which will be used for testing.
 
 - patient_api_url: Patient API URL in API Management
-- master_sub_key: Built-in all-access subscription key. Refer [here](https://docs.microsoft.com/en-us/azure/api-management/api-management-subscriptions) for more details about subscriptions in Azure API Management.
+- patient_sub_key: Subscription key for the patient api. Refer [here](https://docs.microsoft.com/en-us/azure/api-management/api-management-subscriptions) for more details about subscriptions in Azure API Management. This key is obfuscated by default. Use `terraform output patient_sub_key` to get the actual value.
 
 You can always get these two outputs by running following terraform commands.
 
 - `terraform output`: returns two outputs
 - `terraform output patient_api_url`: returns patient_api_url only
-- `terraform output master_sub_key`: returns master_sub_key only
+- `terraform output patient_sub_key`: returns patient_sub_key only
 
-Test your setup by making a POST request with the below body to <patient_api_url>. Don't forget to add a request header named "Ocp-Apim-Subscription-Key" with value <master_sub_key>.
+Test your setup by making a POST request with the below body to <patient_api_url>. Don't forget to add a request header named "Ocp-Apim-Subscription-Key" with value <patient_sub_key>.
 
 ```json
 {

@@ -34,7 +34,8 @@ resource "azurerm_linux_function_app" "fa" {
   lifecycle {
     ignore_changes = [
       app_settings["WEBSITE_RUN_FROM_PACKAGE"],
-      app_settings["WEBSITE_MOUNT_ENABLED"]
+      app_settings["WEBSITE_MOUNT_ENABLED"],
+      virtual_network_subnet_id
     ]
   }
 }
