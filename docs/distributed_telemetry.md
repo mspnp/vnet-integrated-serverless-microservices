@@ -15,7 +15,7 @@ You can use the Terraform templates in the [`/env`](../env) folder to deploy and
 1. Deploy Application Insights
 2. Get the Application Insights instrumentation key
 3. Deploy Azure Functions apps
-4. Set APPINSIGHTS_INSTRUMENTATIONKEY app setting on Azure Function Apps
+4. Set APPLICATIONINSIGHTS_CONNECTION_STRING app setting on Azure Function Apps
 5. Deploy API Management
 6. Add a logger to API Management for the deployed Application Insights instance
 7. Add the configured logger to diagnostics for APIs
@@ -164,26 +164,26 @@ The `AppInsightsService` generates these headers from the `TraceContext` injecte
 This implementation has a full suite of unit tests. By abstracting the calls to Application Insights within the `AppInsightsService`, it is possible to verify that the data services will log any requests and failures correctly. An example of logging dependency tracking for Mongo DB can be found in [`LoggingCollection.spec.ts`](../src/PatientTestsApi/Test/Services/LoggingCollection.spec.ts):
 
 ```typescript
-it("Tracks dependencies for succesful database calls", async function(): Promise<void> {
+it("Tracks dependencies for failed database calls", async function(): Promise<void> {
     const mockCollection = mock<ICollection>();
-    const expectedResult = createOneInsertResult();
     const expectedDoc = {key:"value"};
-    when(mockCollection.insertOne(expectedDoc, anything())).thenResolve(expectedResult);
-    const mockAppInsightsService = mock<IAppInsightsService>();
+    const expectedError = new Error("expectedError");
+    const expectedErrorString = JSON.stringify(expectedError, Object.getOwnPropertyNames(expectedError));
+    when(mockCollection.insertOne(expectedDoc, anything()))
+    .thenThrow(expectedError);
+    const mockAppInsightsService = new AppInsightsFixture().createAppInsightsMock();
     const expectedCollectionName = "collectionName";
     const expectedDbName = "dbName";
     const appInsightsService = instance(mockAppInsightsService);
     const collection = new LoggingCollection(instance(mockCollection), appInsightsService, expectedCollectionName, expectedDbName);
-
-    const result = await collection.insertOne(expectedDoc, {});
-
-    expect(result).is.equal(expectedResult);
-
+    
+    await expect(collection.insertOne(expectedDoc, {})).to.be.rejectedWith(expectedError);
+    
     const [actualTelemetry] = capture(mockAppInsightsService.trackDependency).first();
     expect(actualTelemetry.data).is.equal("{\"insertOne\":{\"options\":{}}}");
     expect(actualTelemetry.dependencyTypeName).is.equal("mongodb");
-    expect(actualTelemetry.resultCode).is.equal(0);
-    expect(actualTelemetry.success).is.equal(true);
+    expect(actualTelemetry.resultCode).is.equal(expectedErrorString);
+    expect(actualTelemetry.success).is.equal(false);
     expect(actualTelemetry.name).is.equal(expectedCollectionName);
     expect(actualTelemetry.target).is.equal(expectedDbName);
 

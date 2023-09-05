@@ -55,16 +55,12 @@ npm install -g azure-functions-core-tools@3
 
 ## Initialise terraform
 
-### Authenticate using a service pricipal
-
-Follow the instructions [here](https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html) to log in using the Azure CLI, create, and set the service prinicpal for Terraform to use.
-
 ### Set environment variables with your Service Principal's information
 
 Create a copy of the `.env.template` file called `.env`. The `.env` file is ignored by git.
 
-Follow the process described [here](https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html#configuring-the-service-principal-in-terraform) to create your service principal, and get the required login values.
-Use those values to populate the following values used for authenticating the Service Principal in the `.env` file:
+Login to your azure subscription using `az login`. If required, set your subscription using `az account set --subscription {subscriptionId}`, substituting your subscription id.
+Use the command `az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/{subscriptionId}`, to create a new service principal. The command will output the required values for the '.env' file.
 
 ```bash
 export ARM_CLIENT_ID="{appId}"
@@ -73,9 +69,11 @@ export ARM_SUBSCRIPTION_ID="{subscriptionId}"
 export ARM_TENANT_ID="{tenant}"
 ```
 
+The process is described [here](https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html#configuring-the-service-principal-in-terraform)
+
 Load the values from the .env file using the command `source .env`. *This may not work in your setup, leading to issues applying the terraform template and logging in with the service principal. If so, you need to copy the contents of the .env file and execute it directly in your terminal.*
 
-### Create a storage acount for the backend config
+### Create a storage account for the backend config
 
 The `.env` file will set environment variables that determine the name of the resource group, the location, and the storage account used for saving Terraform state.
 Note that storage account names need to be globally unique, so you will have to update the storage account name provided in the `.env.template` file. You can check whether a chosen name is available using the following command:

@@ -22,5 +22,8 @@
 				"HashiCorp.terraform"
 			]
 		}
-	}
+	},
+	"mounts": [
+		"source=${localWorkspaceFolder}/../src,target=/workspaces/src,type=bind,consistency=cached"
+	]
 }
