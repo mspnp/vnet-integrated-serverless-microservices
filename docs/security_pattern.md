@@ -89,7 +89,7 @@ Disabling the access key is not a good practice, so we enable access keys in all
 - PatientTests API: An API access key is required to call all functions in PatientTests API function app. In our case, Patient API in API Management needs to include `x-functions-key` in the HTTP header when calling functions in PatientTests API function app.
 - Audit API: An API access key is required to call `CreateAuditRecord` function in Audit API function app. In our case, all functions in PatientTests API function app need to include `x-functions-key` in the HTTP header when calling `CreateAuditRecord` function in Audit API function app.
 
-Alternatively, we could have used Azure Active Directory to secure the API Management endpoint without the need for managing APIM Subscription keys.
+Alternatively, we could have used Microsoft Entra ID to secure the API Management endpoint without the need for managing APIM Subscription keys.
 
 In our scenario, we used host keys for both Function Apps. Where should we store those keys securely? In addition, both Function Apps use Cosmos DB as data store, so where shall we store the Cosmos DB connection string? There are many options. For example, PatientTests API function app can keep the host key of Audit API function app and the Cosmos DB connection string in the application settings. However, it's not a good practice, because the host key and connection string are exposed to all developers who can access the Function App itself. The best practice is keeping sensitive information like API keys and connection strings in Key Vault. This is the way we have implemented this scenario.
 
