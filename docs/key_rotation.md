@@ -18,9 +18,9 @@ Let's say we want to rotate the host key of the Audit API function app. We can f
 
 You can perform these tasks manually in the Azure Portal, or you can use the Azure CLI with the following commands:
 
-1. Rotate the host key: [Web Apps - Create Or Update Host Secret](https://docs.microsoft.com/en-us/rest/api/appservice/webapps/createorupdatehostsecret)
-2. Update the secret: [az keyvault secret set](https://docs.microsoft.com/en-us/cli/azure/keyvault/secret?view=azure-cli-latest#az-keyvault-secret-set)
-3. Update the key vault reference in app settings: [az functionapp config appsettings set](https://docs.microsoft.com/en-us/cli/azure/functionapp/config/appsettings?view=azure-cli-latest#az-functionapp-config-appsettings-set)
+1. Rotate the host key: [Web Apps - Create Or Update Host Secret](https://learn.microsoft.com/rest/api/appservice/webapps/createorupdatehostsecret)
+2. Update the secret: [az keyvault secret set](https://learn.microsoft.com/cli/azure/keyvault/secret?view=azure-cli-latest#az-keyvault-secret-set)
+3. Update the key vault reference in app settings: [az functionapp config appsettings set](https://learn.microsoft.com/cli/azure/functionapp/config/appsettings?view=azure-cli-latest#az-functionapp-config-appsettings-set)
 
 However, we don't want to do these tasks manually due to following reasons.
 
@@ -29,7 +29,7 @@ However, we don't want to do these tasks manually due to following reasons.
 
 ### Rotate the host key
 
-At the time of writing, Terraform Azure Provider does not provide native access to Function App keys, so we have to use the [Web Apps - Create Or Update Host Secret](https://docs.microsoft.com/en-us/rest/api/appservice/webapps/createorupdatehostsecret) REST API to rotate the host key. It's okay, since Terraform does not maintain the host key, we don't have to worry about the state management. The Azure CLI command looks like this:
+At the time of writing, Terraform Azure Provider does not provide native access to Function App keys, so we have to use the [Web Apps - Create Or Update Host Secret](https://learn.microsoft.com/rest/api/appservice/webapps/createorupdatehostsecret) REST API to rotate the host key. It's okay, since Terraform does not maintain the host key, we don't have to worry about the state management. The Azure CLI command looks like this:
 
 ```bash
 az rest --method put --uri /subscriptions/<YOUR_SUBSCRIPTION>/resourceGroups/newcastle/providers/Microsoft.Web/sites/newcastle-fa-audit-api-dev/host/default/functionkeys/default?api-version=2019-08-01 --body <YOUR_PAYLOAD>

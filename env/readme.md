@@ -30,18 +30,18 @@ nvm install lts/erbium
 ```
 
 ### Install Azure CLI
-Follow the instructions [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+Follow the instructions [here](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
 
 On Debian \ Ubuntu:
 
-As described [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest): 
+As described [here](https://learn.microsoft.com/cli/azure/install-azure-cli-apt?view=azure-cli-latest): 
 ```bash
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
 
 ### Install Azure functions CLI
 
-As described [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash#v2): 
+As described [here](https://learn.microsoft.com/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash#v2): 
 ```bash
 npm install -g azure-functions-core-tools@3
 ```
@@ -100,7 +100,7 @@ The build_id variable is used to determine whether to deploy the function apps' 
 
 After applying the terraform configuration successfully, you will see two outputs which will be used for testing.
 - patient_api_url: Patient API URL in API Management
-- master_sub_key: Built-in all-access subscription key. Refer [here](https://docs.microsoft.com/en-us/azure/api-management/api-management-subscriptions) for more details about subscriptions in Azure API Management.
+- master_sub_key: Built-in all-access subscription key. Refer [here](https://learn.microsoft.com/azure/api-management/api-management-subscriptions) for more details about subscriptions in Azure API Management.
 
 You can always get these two outputs by running following terraform commands.
 - `terraform output`: returns two outputs

@@ -25,7 +25,7 @@ In our scenario, we only enabled access restriction and virtual network deployme
 - Access restriction: When we restrict access for function apps, we can restrict IPv4, IPv6 and a virtual network subnet.
     - PatientTests API function app only allows API Management to call it and API Management is the only entry point for the whole system. Since each API Management knows it's talking to a VNet-attached Function, that traffic will be seen as coming from the API Management subnet. We just need to add that subnet in the access restriction allow list of PatientTests API function app. By default, a function app allows all IP addresses, but once you add one network restriction (IP address or subnet), all the other network traffic will be denied (such as direct access from the internet).
     - We deployed PatientTests API function app in a virtual network subnet and we also restricted access for Audit API, configuring Audit API function app to only allow in the virtual network subnet in which PatientTests API function app is deployed. To do so, we just need to add that virtual network subnet in the access restriction allow list of Audit API function app.
-- Deployment to a virtual network: We used [regional virtual network integration](https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#regional-virtual-network-integration) to deploy both function apps in the same virtual network in the same region. There are two key points when using regional virtual network integration.
+- Deployment to a virtual network: We used [regional virtual network integration](https://learn.microsoft.com/azure/azure-functions/functions-networking-options#regional-virtual-network-integration) to deploy both function apps in the same virtual network in the same region. There are two key points when using regional virtual network integration.
     - Premium plan is needed if you want to have both regional virtual network integration and scalability.
     - Since the function app will be deployed in a subnet of the virtual network, we need to configure of the number of IP addresses in the subnet. One IP address is used for each service plan instance.
 
@@ -71,11 +71,11 @@ resource "azurerm_app_service_virtual_network_swift_connection" "vnet_int" {
 
 ### Further Readings
 
-- [API Management access restriction policies](https://docs.microsoft.com/azure/api-management/api-management-access-restriction-policies)
-- [How to use Azure API Management with virtual networks](https://docs.microsoft.com/azure/api-management/api-management-using-with-vnet)
-- [IP addresses of Azure API Management](https://docs.microsoft.com/azure/api-management/api-management-howto-ip-addresses)
-- [Azure App Service access restrictions](https://docs.microsoft.com/azure/app-service/app-service-ip-restrictions)
-- [Azure Functions networking options](https://docs.microsoft.com/azure/azure-functions/functions-networking-options)
+- [API Management access restriction policies](https://learn.microsoft.com/azure/api-management/api-management-access-restriction-policies)
+- [How to use Azure API Management with virtual networks](https://learn.microsoft.com/azure/api-management/api-management-using-with-vnet)
+- [IP addresses of Azure API Management](https://learn.microsoft.com/azure/api-management/api-management-howto-ip-addresses)
+- [Azure App Service access restrictions](https://learn.microsoft.com/azure/app-service/app-service-ip-restrictions)
+- [Azure Functions networking options](https://learn.microsoft.com/azure/azure-functions/functions-networking-options)
 
 ## Access Keys
 In the previous section, we discussed  network-level security, but this is only one aspect of the problem and may not be enough to protect your APIs and Functions. Now we discuss access keys and how to securely store them using Key Vault.
@@ -141,7 +141,7 @@ resource "azurerm_key_vault_access_policy" "fa" {
 ```
 
 ### Further Readings
-- [Subscriptions in Azure API Management](https://docs.microsoft.com/azure/api-management/api-management-subscriptions)
-- [Function access keys](https://docs.microsoft.com/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=csharp#authorization-keys)
-- [How to use managed identities for App Service and Azure Functions](https://docs.microsoft.com/azure/app-service/overview-managed-identity)
-- [Use Key Vault references for App Service and Azure Functions](https://docs.microsoft.com/azure/app-service/app-service-key-vault-references)
+- [Subscriptions in Azure API Management](https://learn.microsoft.com/azure/api-management/api-management-subscriptions)
+- [Function access keys](https://learn.microsoft.com/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=csharp#authorization-keys)
+- [How to use managed identities for App Service and Azure Functions](https://learn.microsoft.com/azure/app-service/overview-managed-identity)
+- [Use Key Vault references for App Service and Azure Functions](https://learn.microsoft.com/azure/app-service/app-service-key-vault-references)

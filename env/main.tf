@@ -115,7 +115,7 @@ resource "azurerm_app_service_plan" "asp_patient_api" {
   location            = var.location
   kind                = "elastic"
 
-  # https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#regional-virtual-network-integration
+  # https://learn.microsoft.com/azure/azure-functions/functions-networking-options#regional-virtual-network-integration
   # A /26 with 64 addresses accommodates a Premium plan with 30 instances.
   maximum_elastic_worker_count = 30
 
