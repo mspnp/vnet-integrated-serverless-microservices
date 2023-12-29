@@ -99,7 +99,7 @@ Same as rotating the host key of Audit API function app, we use the API.
 az rest --method put --uri /subscriptions/<YOUR_SUBSCRIPTION>/resourceGroups/newcastle/providers/Microsoft.Web/sites/newcastle-fa-patient-api-dev/host/default/functionkeys/default?api-version=2019-08-01 --body <YOUR_PAYLOAD>
 ```
 
-### Update the secret  for the Audit API
+### Update the secret for the Audit API
 
 Same as updating the secret for the host key of Audit API function app.
 
@@ -135,7 +135,7 @@ resource "azurerm_api_management_api_policy" "patient_policy" {
     ...
     <!-- Look for func-host-key in the cache -->
     <cache-lookup-value key="func-host-key-${data.azurerm_key_vault_secret.fa_patient_api_host_key.version}" variable-name="funchostkey" />
-    <!-- If API Management doesn’t find it in the cache, make a request for it and store it -->
+    <!-- If API Management doesn't find it in the cache, make a request for it and store it -->
     <choose>
       <when condition="@(!context.Variables.ContainsKey("funchostkey"))">
         <!-- Make HTTP request to get function host key -->
@@ -160,5 +160,5 @@ XML
 
 Last but not least, how do we rotate host keys? There are only two steps:
 
-1. Use Azure CLI to update either or both host keys.
+1. Use the Azure CLI to update either or both host keys.
 2. Run `terraform apply` with your variables to update the dependent systems

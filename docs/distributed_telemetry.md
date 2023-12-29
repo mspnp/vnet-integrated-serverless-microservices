@@ -6,7 +6,7 @@ A common issue with microservice architectures, is that failures can be caused b
 
 ## Solution
 
-This architecture makes use of Application Insights to centralize logging across components. Components contributing to the telemetry includes API Management and the PatientTests and Audit APIs running on Azure Functions. API Management and the Azure Functions runtime has built-in support for Application Insights to generate and correlate a wide variety of telemetry, including standard application output. The Application Insights Nodejs SDK is used in the Function apps to manually track dependencies and other custom telemetry. The telemetry sent to Application Insights can feed into a wider Azure Monitor workspace. Components such as Cosmos DB can send telemetry to Azure Monitor, where it can be correlated with telemetry from Application Insights.
+This architecture makes use of Application Insights to centralize logging across components. Components contributing to the telemetry includes API Management and the PatientTests and Audit APIs running on Azure Functions. API Management and the Azure Functions runtime has built-in support for Application Insights to generate and correlate a wide variety of telemetry, including standard application output. The Application Insights Node.js SDK is used in the Function apps to manually track dependencies and other custom telemetry. The telemetry sent to Application Insights can feed into a wider Azure Monitor workspace. Components such as Azure Cosmos DB can send telemetry to Azure Monitor, where it can be correlated with telemetry from Application Insights.
 
 ## Configuration
 
@@ -20,7 +20,7 @@ You can use the Terraform templates in the [`/env`](../env) folder to deploy and
 6. Add a logger to API Management for the deployed Application Insights instance
 7. Add the configured logger to diagnostics for APIs
 
-Exact instructions for running the terraform deployment is available in the [`/env` readme](../env/readme.md)
+Exact instructions for running the Terraform deployment is available in the [`/env` readme](../env/readme.md)
 
 ## Viewing telemetry
 
@@ -40,26 +40,26 @@ Exact instructions for running the terraform deployment is available in the [`/e
 ![All telemetry](images/AllTelemetry.png)
 
 6. For more powerful and flexible querying, you can view the telemetry in Log Analytics. Scroll back to the search blade and click the *Logs* button. This will open a Log Analytics blade, with a prepopulated query showing the telemetry visible in the search blade.
-![Log analytics](images/LogAnalytics.png)
+![Log Analytics](images/LogAnalytics.png)
 
 ## Operation
 
 ### Automatic telemetry gathering
 
-Once this environment is correctly configured, API Management will start adding a `request-id` header to the backend requests. The Azure Functions runtime will read this header and use it to create a `TraceContext` for the request.  Any telemetry that the runtime logs associated with this request, will have the `operationId` and `parentId` set according to the incoming `request-id` header. This allows Application Insights to correlate the Trace, Exception, and Request telemetry from the Azure Functions runtime with the Request telemetry from Azure API Management.
+Once this environment is correctly configured, API Management will start adding a `request-id` header to the backend requests. The Azure Functions runtime will read this header and use it to create a `TraceContext` for the request. Any telemetry that the runtime logs associated with this request, will have the `operationId` and `parentId` set according to the incoming `request-id` header. This allows Application Insights to correlate the Trace, Exception, and Request telemetry from the Azure Functions runtime with the Request telemetry from Azure API Management.
 
-The NodeJS SDK for Application Insights can also apply automatic dependency gathering to certain libraries such as the mongo driver. We evaluated this but found that dependencies were logged inconsistently for the Mongo API.
+The Node.js SDK for Application Insights can also apply automatic dependency gathering to certain libraries such as the mongo driver. We evaluated this but found that dependencies were logged inconsistently for the Mongo API.
 
-The SDK can also be configured to add required correlation headers to outgoing HTTP requests. This also didn’t work as expected in an Azure Function app, because the request state was not being set correctly per request. It also required us to create a new `TelemetryClient` for each request, which may lead to performance issues.
+The SDK can also be configured to add required correlation headers to outgoing HTTP requests. This also didn't work as expected in an Azure Function app, because the request state was not being set correctly per request. It also required us to create a new `TelemetryClient` for each request, which may lead to performance issues.
 
 ### Manual Telemetry logging
 
 To fix these two issues, you need to
 
 1. manually track the dependency telemetry
-2. add required context headers to outgoing http requests
+2. add required context headers to outgoing HTTP requests
 
-To enable this, Azure Functions exposes a `traceContext` object on the context parameter passed to the Azure Functions execution. We extracted some code from the NodeJS SDK for Application Insights, and modified it to use this `traceContext` object to populate the neccesary variables and headers when logging a dependency telemetry or an outgoing request. The `traceContext` is passed to the `controllerFactory` when a new controller is requested. You can see this in [`src/PatientTestsApi/CreatePatient/index.ts`](../src/PatientTestsApi/CreatePatient/index.ts):
+To enable this, Azure Functions exposes a `traceContext` object on the context parameter passed to the Azure Functions execution. We extracted some code from the Node.js SDK for Application Insights, and modified it to use this `traceContext` object to populate the neccesary variables and headers when logging a dependency telemetry or an outgoing request. The `traceContext` is passed to the `controllerFactory` when a new controller is requested. You can see this in [`src/PatientTestsApi/CreatePatient/index.ts`](../src/PatientTestsApi/CreatePatient/index.ts):
 
 ```typescript
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -130,7 +130,7 @@ The key here is setting `tagOverrides` using the fields exposed on the `Correlat
 
 #### Add tracking headers to outgoing requests
 
-The request context needs to be passed to downstream services to enable them to tag telemetry with the appropriate operation and parent id's. For this implementation, we abstracted http communication in an [`HttpDataService`](../src/PatientTestsApi/Services/HttpDataService.ts). This data service is instantiated in the [`ControllerFactory`](../src/PatientTestsApi/Controllers/ControllerFactory.ts) with an instance of `AppInsightsService`, and passed to the `AuditService`. The `AuditService` uses it to make any outgoing HTTP requests:
+The request context needs to be passed to downstream services to enable them to tag telemetry with the appropriate operation and parent ID's. For this implementation, we abstracted HTTP communication in an [`HttpDataService`](../src/PatientTestsApi/Services/HttpDataService.ts). This data service is instantiated in the [`ControllerFactory`](../src/PatientTestsApi/Controllers/ControllerFactory.ts) with an instance of `AppInsightsService`, and passed to the `AuditService`. The `AuditService` uses it to make any outgoing HTTP requests:
 
 ```typescript
 public async LogAuditRecord(expectedResource: IAuditResource): Promise<void> {
@@ -161,7 +161,7 @@ The `AppInsightsService` generates these headers from the `TraceContext` injecte
 
 ## Testing
 
-This implementation has a full suite of unit tests. By abstracting the calls to Application Insights within the `AppInsightsService`, it is possible to verify that the data services will log any requests and failures correctly. An example of logging dependency tracking for Mongo DB can be found in [`LoggingCollection.spec.ts`](../src/PatientTestsApi/Test/Services/LoggingCollection.spec.ts):
+This implementation has a full suite of unit tests. By abstracting the calls to Application Insights within the `AppInsightsService`, it is possible to verify that the data services will log any requests and failures correctly. An example of logging dependency tracking for MongoDB can be found in [`LoggingCollection.spec.ts`](../src/PatientTestsApi/Test/Services/LoggingCollection.spec.ts):
 
 ```typescript
 it("Tracks dependencies for succesful database calls", async function(): Promise<void> {
