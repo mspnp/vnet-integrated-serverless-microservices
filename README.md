@@ -9,7 +9,7 @@ products:
 - azure-application-insights
 - azure-api-management
 - azure-key-vault
-description: "An end-to-end Azure Functions sample. This sample shows distributed telemetry, secret management, network lockdown, deployment, and load testing."
+description: An end-to-end Azure Functions sample. This sample shows distributed telemetry, secret management, network lockdown, deployment, and load testing.
 urlFragment: "vnet-integrated-serverless"
 ---
 
@@ -26,7 +26,7 @@ The implementation shows:
 - secret management using Key Vault
 - networking lockdown using Azure Functions
 - load testing using Locust
-- database access using Mongo API on Cosmos DB
+- database access using Mongo API on Azure Cosmos DB
 
 ## Contents
 
@@ -42,7 +42,7 @@ The implementation shows:
 
 ## Scenario
 
-The organization needs to digitally store the results of patient medical tests. Other internal and third-party systems will need to interface with this data via an API that allows reading and writing of the data. These interactions need to be recorded in an audit register. Access to the API needs to be managed by a system that allows for easy integration with different authentication mechanisms. APIs should not be publically accessible outside of a single managed endpoint. All code and infrastructure deployment should be automated.
+The organization needs to digitally store the results of patient medical tests. Other internal and third-party systems will need to interface with this data via an API that allows reading and writing of the data. These interactions need to be recorded in an audit register. Access to the API needs to be managed by a system that allows for easy integration with different authentication mechanisms. APIs should not be publicly accessible outside of a single managed endpoint. All code and infrastructure deployment should be automated.
 
 ## Solution Architecture
 
@@ -50,23 +50,23 @@ The following diagram represents the architecture of the solution.
 
 ![Solution Architecture](./docs/images/ProjectArchitecture.png)
 
-At the core of the solution is a set of microservices. The first service (PatientTests API) provides the CRUD operations for patients and their associated tests. The second service (Audit API) provides operations to create auditing entries. Both of these services store data in Cosmos DB, using the Mongo API. The Cosmos DB endpoint can be replaced with another Mongo DB service, without changing code. The services don't share data, and each service may be deployed to its own independent database.
+At the core of the solution is a set of microservices. The first service (PatientTests API) provides the CRUD operations for patients and their associated tests. The second service (Audit API) provides operations to create auditing entries. Both of these services store data in Azure Cosmos DB, using the Mongo API. The Azure Cosmos DB endpoint can be replaced with another MongoDB service, without changing code. The services don't share data, and each service may be deployed to its own independent database.
 
 ## Security
 
-The Audit API is locked down to only be accessible at a network level from other systems in the same vnet. The PatientTests API is similarly locked down to only be accessible from the API Management subnet.  Only the API Management is accessible from the public internet. In addition to the network-level security, the function apps are also protected by requiring API keys for access. These keys are stored in Key Vault, along with other sensitive data such as connection strings, and is only available to specified identities. More information on the security aspects can be found [here](./docs/security_pattern.md). In addition, keys can be rotated to make the system more secure. More information about key rotation can be found [here](./docs/key_rotation.md).
+The Audit API is locked down to only be accessible at a network level from other systems in the same vnet. The PatientTests API is similarly locked down to only be accessible from the API Management subnet. Only the API Management is accessible from the public internet. In addition to the network-level security, the function apps are also protected by requiring API keys for access. These keys are stored in Key Vault, along with other sensitive data such as connection strings, and is only available to specified identities. More information on the security aspects can be found in [Security patterns](./docs/security_pattern.md). In addition, keys can be rotated to make the system more secure. More information about key rotation can be found in [Key rotation](./docs/key_rotation.md).
 
 ## Distributed Telemetry
 
-Telemetry is captured across the whole request pipeline from API Management and the Functions. Telemetry shares a common operation id, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found [here](./docs/distributed_telemetry.md).
+Telemetry is captured across the whole request pipeline from API Management and the functions. Telemetry shares a common operation ID, allowing it to be correlated across these components. More information about this distributed telemetry tracing can be found in [Distributed telemetry](./docs/distributed_telemetry.md).
 
 ## Deployment
 
-The solution may be deployed using Terraform. The terraform templates and code is available in the `/env` folder. The [readme](./env/readme.md) explains how to deploy the environment into your own Azure subscription. This can easily be automated using a system such as Azure DevOps or Github Actions.
+The solution may be deployed using Terraform. The Terraform templates and code is available in the `/env` folder. The [readme](./env/readme.md) explains how to deploy the environment into your own Azure subscription. This can easily be automated using a system such as Azure DevOps or GitHub Actions.
 
 The [PatientTests API](./src/PatientTestsApi/readme.md) and the [Audit API](./src/AuditApi/readme.md) may be found in the `/src` folder.
 
-Each of these three folders contain a [dev container](https://code.visualstudio.com/docs/remote/containers), which will have all the prerequisites installed, to help you get going quicker.
+These three folders contain a [dev container](https://code.visualstudio.com/docs/remote/containers), which will have all the prerequisites installed, to help you get going quicker.
 
 ## API Source
 
@@ -74,4 +74,4 @@ The APIs are built using TypeScript on Azure Functions. Both the PatientTests AP
 
 ## Load Test
 
-The project contains a [Locust load test](./src/LoadTest/README.md) against the API Management in the `/src/LoadTest` folder. [Locust](https://locust.io/) is an open source load testing tool and the tests are written in Python. The load tests can be run locally and remotely in AKS cluster.
+The project contains a [Locust load test](./src/LoadTest/README.md) against the API Management in the `/src/LoadTest` folder. [Locust](https://locust.io/) is an open-source load testing tool and the tests are written in Python. The load tests can be run locally and remotely in AKS cluster.
